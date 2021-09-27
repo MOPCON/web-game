@@ -1,0 +1,16 @@
+$colorPrimary: #222222;
+$colorError: #DB3328;
+$colorBlack: #000000;
+$colorDarkBlue: rgba(13, 19, 54, 0.87);
+$colorOrange: #ff9933;
+$colorGray: #DCDDDD;
+$colorWhite: #ffffff;
+$colorWhiteLight: rgba(255, 255, 255, 0.87);
+$colorFont: $colorPrimary;
+
+$fontStyle: 'Noto Sans';
+
+$bg: '~@/assets/images/bg.svg';
+$bg-mobile: '~@/assets/images/bg-mobile.svg';
+
+$font-weight: (100, 200, 300, 400, 500, 600, 700, 800, 900);

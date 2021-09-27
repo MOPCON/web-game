@@ -1,10 +1,43 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <div v-if="!isMobile">
+    <div id="nav">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/about">About</router-link>
+    </div>
+    <router-view />
   </div>
-  <router-view />
+  <div v-if="isMobile">
+    <CrowdedNotice />
+  </div>
 </template>
+
+<script>
+import CrowdedNotice from '@/components/CrowdedNotice.vue';
+export default {
+  components: {
+    CrowdedNotice,
+  },
+  data() {
+    return {
+      innerWidth: null,
+    };
+  },
+  computed: {
+    isMobile() {
+      return this.innerWidth <= 768;
+    },
+  },
+  mounted() {
+    this.innerWidth = window.innerWidth;
+    window.addEventListener('resize', this.resize);
+  },
+  methods: {
+    resize() {
+      this.innerWidth = window.innerWidth;
+    },
+  },
+};
+</script>
 
 <style lang="scss">
 #app {

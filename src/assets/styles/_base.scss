@@ -1,0 +1,43 @@
+html,
+body {
+  overflow-x: hidden;
+}
+body {
+  * {
+    font-size: 16px;
+    font-weight: normal;
+    font-family: Noto Sans;
+    line-height: 1.5;
+    letter-spacing: 0.8px;
+    color: $colorFont;
+    box-sizing: border-box;
+    position: relative;
+    text-decoration: none;
+  }
+}
+
+.container {
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  width: 100%;
+  max-width: 1280px;
+}
+
+h1 {
+  @include font(3rem, $colorFont, 900);
+  margin: 0;
+}
+
+.home-bg {
+  @include bgCenter;
+  background-image: url($bg);
+  @include screen(pad) {
+    background-image: url($bg-mobile);
+    background-position: right;
+  }
+}
+
+.color-dark-blue {
+  color: $colorDarkBlue;
+}

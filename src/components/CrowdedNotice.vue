@@ -40,7 +40,7 @@ export default {
       }
     }
     span {
-      font-size: 1.25rem;
+      text-align: center;
     }
     .image-mo {
       width: 350px;

@@ -1,5 +1,6 @@
 <template>
   <div v-if="!isMobile">
+    <Navbar />
     <router-view />
   </div>
   <div v-if="isMobile">
@@ -8,9 +9,11 @@
 </template>
 
 <script>
+import Navbar from '@/components/Navbar.vue';
 import CrowdedNotice from '@/components/CrowdedNotice.vue';
 export default {
   components: {
+    Navbar,
     CrowdedNotice,
   },
   data() {

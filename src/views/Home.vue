@@ -27,7 +27,7 @@
         </p>
         <p>必須為 MOPCON 2021 購票會眾才擁有參與遊戲及抽獎的資格。</p>
         <div class="btn-area">
-          <div class="btn btn-orange">
+          <div class="btn btn-orange" @click="redirectTo('/register')">
             會眾註冊<i class="fas fa-long-arrow-alt-right"></i>
           </div>
           <div class="btn">會眾登入<i class="fas fa-arrow-right"></i></div>
@@ -40,6 +40,11 @@
 <script>
 export default {
   name: 'Home',
+  methods: {
+    redirectTo(url) {
+      this.$router.push({ path: url });
+    },
+  },
 };
 </script>
 

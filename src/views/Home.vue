@@ -30,7 +30,9 @@
           <div class="btn btn-orange" @click="redirectTo('/register')">
             會眾註冊<i class="fas fa-long-arrow-alt-right"></i>
           </div>
-          <div class="btn">會眾登入<i class="fas fa-arrow-right"></i></div>
+          <div class="btn" @click="redirectTo('/login')">
+            會眾登入<i class="fas fa-arrow-right"></i>
+          </div>
         </div>
       </div>
     </div>

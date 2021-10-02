@@ -40,7 +40,8 @@ h3 {
   margin: 0;
 }
 
-p, span {
+p,
+span {
   @include font(1.25rem, $colorPrimary, 400);
   line-height: 1.875rem;
   margin: 0;
@@ -63,3 +64,77 @@ p, span {
   color: $colorPrimary;
 }
 
+.color-orange {
+  color: $colorOrange;
+}
+
+.link-orange {
+  color: $colorOrange;
+  cursor: pointer;
+  &:hover {
+    color: $colorOrangeLight;
+  }
+}
+
+.input {
+  border: 1px solid $colorGray;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 8px 24px;
+  margin-right: 0.5rem;
+  &::placeholder {
+    color: $colorGray;
+  }
+  &-auto {
+    width: 100%;
+  }
+  &-error {
+    @include font(14px, $colorError, 400);
+    @include flex(normal, row, center);
+    line-height: 30px;
+    svg {
+      font-size: 1.25rem;
+      margin-right: 0.5rem;
+      path {
+        color: $colorError;
+      }
+    }
+  }
+}
+
+.form-input {
+  @include flex(normal, row, center);
+  flex-flow: wrap;
+}
+
+.form-checkbox {
+  @include flex(normal, row, center);
+  .input[type="checkbox"] {
+    display: none;
+  }
+  .input[type="checkbox"] + label {
+    display: inline-block;
+    padding-left: 26px;
+    height: 20px;
+    background: url($checkbox-off) no-repeat;
+    background-position: center;
+    user-select: none;
+    cursor: pointer;
+  }
+  .input[type="checkbox"]:checked + label {
+    background: url($checkbox-on) no-repeat;
+    background-position: center;
+  }
+  .input[type="checkbox"].valid + label {
+    background: url($checkbox-valid) no-repeat;
+    background-position: center;
+  }
+}
+
+.form-password .togglePassword {
+  margin-left: -50px;
+  margin-right: 1rem;
+  cursor: pointer;
+  color: $colorDarkBlue;
+  font-size: 1rem;
+}

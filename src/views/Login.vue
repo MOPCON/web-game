@@ -6,39 +6,47 @@
         <div class="box">
           <h2>即刻回到戰場</h2>
           <h1>讓世人記得勇者大人的名號</h1>
-          <div class="title">
-            <img src="@/assets/images/title-tag.svg" />
-            <h3 class="color-primary">請輸入您的帳號/電子郵件</h3>
-          </div>
-          <div class="form-input">
-            <input
-              id="email"
-              type="email"
-              class="input col-8"
-              placeholder="example@gmail.com"
-              required
-            />
-          </div>
-          <div class="title">
-            <img src="@/assets/images/title-tag.svg" />
-            <h3 class="color-primary">請輸入您的密碼</h3>
-          </div>
-          <div class="form-input form-password">
-            <input
-              id="password"
-              :type="showPassword ? 'text' : 'password'"
-              name="password"
-              class="input col-8"
-              placeholder="6-18位數密碼，請區分大小寫"
-              required
-            />
-            <span class="togglePassword" @click="togglePassword"> 顯示 </span>
-          </div>
-          <div class="btn-area">
-            <div class="btn btn-orange">
-              登入<i class="fas fa-long-arrow-alt-right"></i>
+          <Form
+            @submit="onSubmit"
+            v-slot="{ errors }"
+            :validation-schema="schema"
+          >
+            <div class="title">
+              <img src="@/assets/images/title-tag.svg" />
+              <h3 class="color-primary">請輸入您的帳號/電子郵件</h3>
             </div>
-          </div>
+            <div class="form-input">
+              <Field
+                name="email"
+                class="input col-8"
+                placeholder="example@gmail.com"
+              />
+              <div class="input-error" v-if="errors.email">
+                <i class="fas fa-times-circle"></i>{{ errors.email }}
+              </div>
+            </div>
+            <div class="title">
+              <img src="@/assets/images/title-tag.svg" />
+              <h3 class="color-primary">請輸入您的密碼</h3>
+            </div>
+            <div class="form-input form-password">
+              <Field
+                name="password"
+                :type="showPassword ? 'text' : 'password'"
+                class="input col-8"
+                placeholder="6-18位數密碼，請區分大小寫"
+              />
+              <span class="togglePassword" @click="togglePassword"> 顯示 </span>
+              <div class="input-error" v-if="errors.password">
+                <i class="fas fa-times-circle"></i>{{ errors.password }}
+              </div>
+            </div>
+            <div class="btn-area">
+              <button class="btn btn-orange">
+                登入<i class="fas fa-long-arrow-alt-right"></i>
+              </button>
+            </div>
+          </Form>
         </div>
       </div>
     </div>
@@ -46,8 +54,30 @@
 </template>
 
 <script>
+import { Field, Form } from 'vee-validate';
+import * as Yup from 'yup';
 export default {
   name: 'Login',
+  components: {
+    Field,
+    Form,
+  },
+  setup() {
+    function onSubmit(values) {
+      alert(JSON.stringify(values, null, 2));
+    }
+    const schema = Yup.object().shape({
+      email: Yup.string().required('請輸入您的帳號/電子郵件'),
+      password: Yup.string()
+        .min(6, '密碼最少 6 碼')
+        .max(18, '密碼最多 18 碼')
+        .required('請輸入您的密碼'),
+    });
+    return {
+      onSubmit,
+      schema,
+    };
+  },
   data() {
     return {
       showPassword: false,
@@ -96,7 +126,7 @@ export default {
     .title {
       @include flex;
       margin-top: 2rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
     }
     .btn-area {
       @include flex(flex-end);

@@ -4,7 +4,7 @@
       id="myModal"
       class="modal fade"
       :class="{ show: show }"
-      :style="{ 'display: block': show }"
+      :style="{ 'display: flex': show }"
     >
       <div class="modal-content">
         <div class="clearfix">
@@ -60,7 +60,7 @@ export default {
       const modal = document.getElementById('myModal');
       if (status) {
         body.classList.add('modal-open');
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
       } else {
         modal.style.display = 'none';
         modal.classList.remove('show');
@@ -80,6 +80,7 @@ export default {
 
 .modal {
   display: none;
+  align-items: center;
   position: fixed;
   z-index: 1071;
   left: 0;

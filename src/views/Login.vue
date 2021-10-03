@@ -93,11 +93,13 @@ export default {
 
 <style lang="scss">
 .Login {
-  min-height: 100vh;
+  min-height: 700px;
   height: 100vh;
   .container {
     @include flex(center, row, center);
     height: 100%;
+    padding-top: 100px;
+    padding-bottom: 50px;
   }
   .area {
     @include flex(space-between, row, stretch);

@@ -116,18 +116,19 @@ span {
     display: inline-block;
     padding-left: 26px;
     height: 20px;
+    line-height: 20px;
     background: url($checkbox-off) no-repeat;
-    background-position: center;
+    background-position: left;
     user-select: none;
     cursor: pointer;
   }
   .input[type="checkbox"]:checked + label {
     background: url($checkbox-on) no-repeat;
-    background-position: center;
+    background-position: left;
   }
   .input[type="checkbox"].valid + label {
     background: url($checkbox-valid) no-repeat;
-    background-position: center;
+    background-position: left;
   }
 }
 

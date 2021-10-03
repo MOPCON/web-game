@@ -144,8 +144,7 @@
           class="input"
           value="policy"
         />
-        <label for="policy-modal"></label>
-        <span class="policy-content">我已閱讀並同意</span>
+        <label for="policy-modal">我已閱讀並同意</label>
       </div>
     </div>
   </Modal>
@@ -189,7 +188,7 @@ export default {
       modalOpen: false,
       showPassword: false,
       showConfirmPassword: false,
-      checkPolicy: '',
+      checkPolicy: undefined,
     };
   },
   methods: {
@@ -212,10 +211,12 @@ export default {
 
 <style lang="scss">
 .Register {
-  min-height: 100vh;
+  min-height: 800px;
   height: 100vh;
   .container {
+    @include flex(center, row, center);
     padding-top: 100px;
+    padding-bottom: 50px;
   }
   .area {
     @include flex(space-between, row, stretch);

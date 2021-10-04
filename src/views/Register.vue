@@ -162,9 +162,6 @@ export default {
     Form,
   },
   setup() {
-    function onSubmit(values) {
-      alert(JSON.stringify(values, null, 2));
-    }
     const schema = Yup.object().shape({
       email: Yup.string().required('請輸入您的帳號/電子郵件'),
       password: Yup.string()
@@ -179,7 +176,6 @@ export default {
       policy: Yup.string().required(),
     });
     return {
-      onSubmit,
       schema,
     };
   },
@@ -204,6 +200,14 @@ export default {
     },
     toggleConfirmPassword() {
       this.showConfirmPassword = !this.showConfirmPassword;
+    },
+    onSubmit(values) {
+      // TODO: call api
+      console.log(JSON.stringify(values, null, 2));
+      this.redirectTo('/introduction');
+    },
+    redirectTo(url) {
+      this.$router.push({ path: url });
     },
   },
 };

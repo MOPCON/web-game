@@ -6,7 +6,7 @@
       :class="{ show: show }"
       :style="{ 'display: flex': show }"
     >
-      <div class="modal-content">
+      <div class="modal-content" :class="{ 'modal-content-black': blackMode }">
         <div class="clearfix">
           <span class="close" @click="close()">
             <i class="fas fa-times"></i>
@@ -23,6 +23,7 @@ export default {
   name: 'Modal',
   props: {
     modalOpen: Boolean,
+    blackMode: Boolean,
   },
   data() {
     return {
@@ -112,6 +113,10 @@ export default {
   @include screen(pad) {
     padding: 1rem 1.5rem;
   }
+}
+
+.modal.fade .modal-content-black {
+  background-color: $colorBlack;
 }
 
 .modal.show .modal-content {

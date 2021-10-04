@@ -3,6 +3,7 @@ import Home from '../views/Home.vue';
 import Register from '../views/Register.vue';
 import Login from '../views/Login.vue';
 import Introduction from '../views/Introduction.vue';
+import Game from '../views/Game.vue';
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/introduction',
     name: 'Introduction',
     component: Introduction,
+  },
+  {
+    path: '/game',
+    name: 'Game',
+    component: Game,
   },
 ];
 

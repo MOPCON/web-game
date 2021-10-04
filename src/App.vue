@@ -41,7 +41,7 @@ export default {
     blackMode() {
       const path = this.$route.path;
       let isBlackMode = false;
-      if (path === '/introduction') {
+      if (path === '/introduction' || path === '/game') {
         isBlackMode = true;
       }
       return isBlackMode;

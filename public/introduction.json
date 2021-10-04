@@ -6,7 +6,8 @@
         "can_previous": false,
         "previous_introduction_id": null,
         "next_type": "introduction",
-        "next_introduction_id": 2
+        "next_introduction_id": 2,
+        "next_url": null
     },
     {
         "id": 2,
@@ -15,6 +16,7 @@
         "can_previous": true,
         "previous_introduction_id": 1,
         "next_type": "game",
-        "next_introduction_id": null
+        "next_introduction_id": null,
+        "next_url": "/game"
     }
 ]

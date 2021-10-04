@@ -10,7 +10,7 @@
         <div class="content">
           <p>{{ this.introduction.description }}</p>
           <div class="button-area">
-            <div class="btn" @click="nextPage">
+            <div class="btn btn-black" @click="nextPage">
               點擊繼續<i class="fas fa-arrow-right"></i>
             </div>
           </div>
@@ -89,11 +89,11 @@ export default {
         this.introductionId = this.introduction.next_introduction_id;
         this.getIntroduction(this.introductionId);
       } else {
-        this.redirectTo('/game');
+        this.redirectTo(this.introduction.next_url);
       }
     },
     redirectTo(url) {
-      console.log(url);
+      this.$router.push({ path: url });
     },
     previousPage() {
       this.introductionId = this.introduction.previous_introduction_id;

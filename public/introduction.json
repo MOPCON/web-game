@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "name": "前情提要",
+        "description": "從前從前，在一個美麗的國度中住著一個漂亮的公主，名叫 Mosume。一直以來，他都住在父王親手打造的王宮中，每天聽著蟲鳴鳥叫聲醒來，在花香中度過美好的一天。直到有一次，覬覦豐厚資產的鄰國們組成了強大的同盟，虎視眈眈地往首都逼近。最終，王國馬上就敗下陣來，士兵死傷無數，Mosume 也被虜到臭蟲帝國。",
+        "can_previous": false,
+        "previous_introduction_id": null,
+        "next_type": "introduction",
+        "next_introduction_id": 2,
+        "next_url": null
+    },
+    {
+        "id": 2,
+        "name": "前情提要",
+        "description": "而你，一個王國中的小衛兵，因為在宿舍中睡過頭，而沒有參與這場戰爭。當你一起床才發現，國家已經滅亡，而你心愛的公主也已不在你身邊。悲痛欲絕的你，想起了國王對你的知遇之恩、以及公主美麗的笑靨，毅然決然地踏上了拯救公主的旅途...",
+        "can_previous": true,
+        "previous_introduction_id": 1,
+        "next_type": "game",
+        "next_introduction_id": null,
+        "next_url": "/game"
+    }
+]

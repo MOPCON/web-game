@@ -35,3 +35,12 @@
     color: $colorWhite;
   }
 }
+
+.btn-black:hover {
+  background-color: $colorOrange;
+  border: 2px solid $colorOrange;
+  color: $colorWhite;
+  svg path {
+    color: $colorWhite;
+  }
+}

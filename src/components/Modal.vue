@@ -4,9 +4,9 @@
       id="myModal"
       class="modal fade"
       :class="{ show: show }"
-      :style="{ 'display: block': show }"
+      :style="{ 'display: flex': show }"
     >
-      <div class="modal-content">
+      <div class="modal-content" :class="{ 'modal-content-black': blackMode }">
         <div class="clearfix">
           <span class="close" @click="close()">
             <i class="fas fa-times"></i>
@@ -23,6 +23,7 @@ export default {
   name: 'Modal',
   props: {
     modalOpen: Boolean,
+    blackMode: Boolean,
   },
   data() {
     return {
@@ -60,7 +61,7 @@ export default {
       const modal = document.getElementById('myModal');
       if (status) {
         body.classList.add('modal-open');
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
       } else {
         modal.style.display = 'none';
         modal.classList.remove('show');
@@ -80,6 +81,7 @@ export default {
 
 .modal {
   display: none;
+  align-items: center;
   position: fixed;
   z-index: 1071;
   left: 0;
@@ -111,6 +113,10 @@ export default {
   @include screen(pad) {
     padding: 1rem 1.5rem;
   }
+}
+
+.modal.fade .modal-content-black {
+  background-color: $colorBlack;
 }
 
 .modal.show .modal-content {

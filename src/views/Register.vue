@@ -144,8 +144,7 @@
           class="input"
           value="policy"
         />
-        <label for="policy-modal"></label>
-        <span class="policy-content">我已閱讀並同意</span>
+        <label for="policy-modal">我已閱讀並同意</label>
       </div>
     </div>
   </Modal>
@@ -163,9 +162,6 @@ export default {
     Form,
   },
   setup() {
-    function onSubmit(values) {
-      alert(JSON.stringify(values, null, 2));
-    }
     const schema = Yup.object().shape({
       email: Yup.string().required('請輸入您的帳號/電子郵件'),
       password: Yup.string()
@@ -180,7 +176,6 @@ export default {
       policy: Yup.string().required(),
     });
     return {
-      onSubmit,
       schema,
     };
   },
@@ -189,7 +184,7 @@ export default {
       modalOpen: false,
       showPassword: false,
       showConfirmPassword: false,
-      checkPolicy: '',
+      checkPolicy: undefined,
     };
   },
   methods: {
@@ -206,16 +201,26 @@ export default {
     toggleConfirmPassword() {
       this.showConfirmPassword = !this.showConfirmPassword;
     },
+    onSubmit(values) {
+      // TODO: call api
+      console.log(JSON.stringify(values, null, 2));
+      this.redirectTo('/introduction');
+    },
+    redirectTo(url) {
+      this.$router.push({ path: url });
+    },
   },
 };
 </script>
 
 <style lang="scss">
 .Register {
-  min-height: 100vh;
+  min-height: 800px;
   height: 100vh;
   .container {
+    @include flex(center, row, center);
     padding-top: 100px;
+    padding-bottom: 50px;
   }
   .area {
     @include flex(space-between, row, stretch);

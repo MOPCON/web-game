@@ -52,11 +52,13 @@ export default {
 
 <style lang="scss">
 .Home {
-  min-height: 100vh;
+  min-height: 800px;
   height: 100vh;
   .area {
     @include flex(space-between, row, center);
     height: 100%;
+    padding-top: 100px;
+    padding-bottom: 50px;
   }
   .image-mo {
     width: 35%;

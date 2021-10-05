@@ -63,9 +63,6 @@ export default {
     Form,
   },
   setup() {
-    function onSubmit(values) {
-      alert(JSON.stringify(values, null, 2));
-    }
     const schema = Yup.object().shape({
       email: Yup.string().required('請輸入您的帳號/電子郵件'),
       password: Yup.string()
@@ -74,7 +71,6 @@ export default {
         .required('請輸入您的密碼'),
     });
     return {
-      onSubmit,
       schema,
     };
   },
@@ -87,17 +83,27 @@ export default {
     togglePassword() {
       this.showPassword = !this.showPassword;
     },
+    onSubmit(values) {
+      // TODO: call api
+      console.log(JSON.stringify(values, null, 2));
+      this.redirectTo('/introduction');
+    },
+    redirectTo(url) {
+      this.$router.push({ path: url });
+    },
   },
 };
 </script>
 
 <style lang="scss">
 .Login {
-  min-height: 100vh;
+  min-height: 700px;
   height: 100vh;
   .container {
     @include flex(center, row, center);
     height: 100%;
+    padding-top: 100px;
+    padding-bottom: 50px;
   }
   .area {
     @include flex(space-between, row, stretch);

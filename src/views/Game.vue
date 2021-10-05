@@ -35,6 +35,9 @@
             當你終於到達了臭蟲帝國之後，發現這裡的王宮戒備森嚴，於是決定等到晚上再作打算。一路上風塵僕僕，你已經餓扁了。因此，你急需找一點食物，剛好有人跟你說，某個地方需要你去做一份工作，為了食物，你只好姑且一試...
           </p>
           <div class="button-area">
+            <div class="btn btn-black" @click="openModal('prize')">
+              領取獎品<i class="fas fa-arrow-right"></i>
+            </div>
             <div class="btn btn-black" @click="openModal('task')">
               挑戰遊戲<i class="fas fa-arrow-right"></i>
             </div>
@@ -54,6 +57,7 @@
         是否要退出遊戲？
       </h1>
       <h1 v-if="modalType === 'task'" class="color-orange">挑戰任務</h1>
+      <h1 v-if="modalType === 'prize'" class="color-orange">領取獎品</h1>
     </div>
     <div class="modal-hr" />
     <div v-if="modalType === 'leave'" class="modal-body">
@@ -71,41 +75,58 @@
         <div class="btn btn-black" @click="redirectTo('/leave')">離開遊戲</div>
       </div>
     </div>
-    <Form @submit="onSubmit" v-slot="{ errors }" :validation-schema="schema">
-      <div v-if="modalType === 'task'" class="modal-body">
-        <div>
-          <div class="title">
-            <img src="@/assets/images/title-tag.svg" />
-            <h3>提示</h3>
-          </div>
-          <p>請找到並前往攤位 A 完成任務。</p>
+    <Form
+      v-if="modalType === 'task'"
+      @submit="onSubmit"
+      v-slot="{ errors }"
+      :validation-schema="schema"
+      class="modal-body"
+    >
+      <div>
+        <div class="title">
+          <img src="@/assets/images/title-tag.svg" />
+          <h3>提示</h3>
         </div>
-        <div>
-          <div class="title">
-            <img src="@/assets/images/title-tag.svg" />
-            <h3>題目</h3>
-          </div>
-          <p>請問做完這份工作後，你得到幾個 MO 幣？</p>
+        <p>請找到並前往攤位 A 完成任務。</p>
+      </div>
+      <div>
+        <div class="title">
+          <img src="@/assets/images/title-tag.svg" />
+          <h3>題目</h3>
         </div>
-        <div>
-          <div class="title">
-            <img src="@/assets/images/title-tag.svg" />
-            <h3>請輸入您的答案</h3>
-          </div>
-          <Field
-            name="answer"
-            class="input col-10"
-            placeholder="輸入您的答案"
-          />
-          <div class="input-error" v-if="errors.answer">
-            <i class="fas fa-times-circle"></i>{{ errors.answer }}
-          </div>
+        <p>請問做完這份工作後，你得到幾個 MO 幣？</p>
+      </div>
+      <div>
+        <div class="title">
+          <img src="@/assets/images/title-tag.svg" />
+          <h3>請輸入您的答案</h3>
         </div>
-        <div class="button-area">
-          <button class="btn btn-black">送出答案</button>
+        <Field name="answer" class="input col-10" placeholder="輸入您的答案" />
+        <div class="input-error" v-if="errors.answer">
+          <i class="fas fa-times-circle"></i>{{ errors.answer }}
         </div>
       </div>
+      <div class="button-area">
+        <button class="btn btn-black">送出答案</button>
+      </div>
     </Form>
+    <div v-if="modalType === 'prize'" class="modal-body">
+      <div>
+        <div class="title">
+          <img src="@/assets/images/title-tag.svg" />
+          <h3>提示</h3>
+        </div>
+        <p>
+          這裡是遊戲的中繼站，挑戰到這裡辛苦啦！
+          為了好好獎賞努力玩大地遊戲的大家，今年 MOPCON
+          特別提供數位獎品讓你下載哦！ btw 如果繼續挑戰，把 Mosume
+          解救出來的話，將有機會獲得更棒的神秘獎勵唷！
+        </p>
+      </div>
+      <div class="button-area">
+        <div class="btn btn-black" @click="downloadPrize()">下載獎品</div>
+      </div>
+    </div>
   </Modal>
 </template>
 
@@ -140,7 +161,7 @@ export default {
   emits: ['canPrevious'],
   methods: {
     redirectTo(url) {
-      console.log(url);
+      this.$router.push({ path: url });
     },
     openLeaveGame() {
       this.openModal('leave');
@@ -156,7 +177,10 @@ export default {
     onSubmit(values) {
       // TODO: call api
       console.log(JSON.stringify(values, null, 2));
-      // this.redirectTo('/reward');
+      this.redirectTo('/reward');
+    },
+    downloadPrize() {
+      console.log('download prize');
     },
   },
 };
@@ -230,8 +254,11 @@ export default {
         }
       }
       .gift.orange {
-        border: 1px solid #ff9933;
-        background: $colorWhite;
+        border: 1px solid $colorOrange;
+        background: $colorOrange;
+        svg path {
+          color: $colorWhite;
+        }
       }
       .mo-circle {
         width: 26px;
@@ -267,11 +294,11 @@ export default {
     }
   }
 }
-.modal {
-  &-title {
+.modal > .modal-content-black {
+  .modal-title {
     @include flex(center);
   }
-  &-hr {
+  .modal-hr {
     width: 90%;
     height: 2px;
     margin: 2.5rem auto;
@@ -282,7 +309,7 @@ export default {
       rgba(255, 153, 51, 0.6) 100%
     );
   }
-  &-body {
+  .modal-body {
     @include flex(normal, column, center);
     .title {
       @include flex;

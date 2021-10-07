@@ -4,29 +4,36 @@
       <div class="area">
         <div class="orange-hr" />
         <div class="image">
-          <div class="flow-chart">
+          <div class="flow-chart flow-chart-extend">
             <div class="line line-orange" />
             <i class="fas fa-check-circle orange"></i>
             <div class="line line-orange" />
             <div class="mo-circle">
               <img src="@/assets/images/mo-circle.jpg" width="24" />
+              <div class="notify">恭喜答對了！繼續挑戰下一關吧</div>
             </div>
+            <div class="line" />
+            <i class="far fa-circle"></i>
+            <div class="line" />
+            <i class="far fa-circle"></i>
             <div class="line line-orange">
               <div class="mo-circle">
                 <img src="@/assets/images/mo-circle.jpg" width="24" />
               </div>
             </div>
+            <div class="gift line-orange">
+              <i class="fas fa-gift"></i>
+              <div class="notify">恭喜答對了！繼續挑戰下一關吧</div>
+            </div>
+            <div class="line line-orange" />
             <div class="gift orange"><i class="fas fa-gift"></i></div>
-            <div class="line" />
-            <i class="far fa-circle"></i>
-            <div class="line" />
-            <i class="far fa-circle"></i>
             <div class="line" />
             <div class="gift"><i class="fas fa-gift"></i></div>
             <div class="line" />
-            <i class="far fa-circle"></i>
-            <div class="line" />
-            <i class="far fa-circle"></i>
+            <div class="mo-circle">
+              <img src="@/assets/images/mo-circle.jpg" width="24" />
+              <div class="notify">恭喜完成所有挑戰！</div>
+            </div>
           </div>
         </div>
         <div class="orange-hr" />
@@ -260,6 +267,10 @@ export default {
           color: $colorWhite;
         }
       }
+      .gift.line-orange {
+        border: 1px solid $colorOrange;
+        background: $colorWhite;
+      }
       .mo-circle {
         width: 26px;
         height: 26px;
@@ -269,11 +280,32 @@ export default {
           border-radius: 11px;
         }
       }
+      .mo-circle .notify,
+      .gift .notify {
+        width: 242px;
+        position: absolute;
+        font-size: 14px;
+        color: orange;
+        background: white;
+        border-radius: 8px;
+        padding: 4px 16px;
+        border: 1px solid #ff9933;
+        top: 30px;
+        left: -110px;
+      }
+      .mo-circle:last-child .notify {
+        left: -144px;
+        width: 168px;
+      }
       .line .mo-circle {
         position: absolute;
         top: -11px;
         right: 0px;
       }
+    }
+    .flow-chart-extend {
+      height: 110px;
+      padding-bottom: 30px;
     }
   }
   .content {

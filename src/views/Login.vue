@@ -17,12 +17,29 @@
             </div>
             <div class="form-input">
               <Field
+                v-model="email"
                 name="email"
                 class="input col-8"
                 placeholder="example@gmail.com"
               />
-              <div class="input-error" v-if="errors.email">
-                <i class="fas fa-times-circle"></i>{{ errors.email }}
+              <div
+                class="input-error"
+                v-if="
+                  errors.email ||
+                  (errorMessage.email && errorMessage.email.length > 0)
+                "
+              >
+                <i class="fas fa-times-circle"></i>
+                <div>
+                  <span v-if="errors.email">
+                    {{ errors.email }}
+                  </span>
+                  <span
+                    v-if="errorMessage.email && errorMessage.email.length > 0"
+                  >
+                    {{ errorMessage.email[0] }}
+                  </span>
+                </div>
               </div>
             </div>
             <div class="title">
@@ -31,14 +48,33 @@
             </div>
             <div class="form-input form-password">
               <Field
+                v-model="password"
                 name="password"
                 :type="showPassword ? 'text' : 'password'"
                 class="input col-8"
                 placeholder="6-18位數密碼，請區分大小寫"
               />
               <span class="togglePassword" @click="togglePassword"> 顯示 </span>
-              <div class="input-error" v-if="errors.password">
-                <i class="fas fa-times-circle"></i>{{ errors.password }}
+              <div
+                class="input-error"
+                v-if="
+                  errors.password ||
+                  (errorMessage.password && errorMessage.password.length > 0)
+                "
+              >
+                <i class="fas fa-times-circle"></i>
+                <div>
+                  <span v-if="errors.password">
+                    {{ errors.password }}
+                  </span>
+                  <span
+                    v-if="
+                      errorMessage.password && errorMessage.password.length > 0
+                    "
+                  >
+                    {{ errorMessage.password[0] }}
+                  </span>
+                </div>
               </div>
             </div>
             <div class="btn-area">
@@ -56,11 +92,17 @@
 <script>
 import { Field, Form } from 'vee-validate';
 import * as Yup from 'yup';
+import api from '../apis/index';
 export default {
   name: 'Login',
   components: {
     Field,
     Form,
+  },
+  provide() {
+    return {
+      api: api,
+    };
   },
   setup() {
     const schema = Yup.object().shape({
@@ -77,16 +119,34 @@ export default {
   data() {
     return {
       showPassword: false,
+      email: '',
+      password: '',
+      errorMessage: {},
     };
   },
   methods: {
     togglePassword() {
       this.showPassword = !this.showPassword;
     },
-    onSubmit(values) {
-      // TODO: call api
-      console.log(JSON.stringify(values, null, 2));
-      this.redirectTo('/introduction');
+    onSubmit() {
+      const data = {
+        uid: this.email,
+        password: this.password,
+      };
+      api.auth
+        .login(data)
+        .then((response) => {
+          let res = response.data;
+
+          this.$store.dispatch('auth/setAuth', {
+            token: res.data.token_type + ' ' + res.data.access_token,
+          });
+
+          this.redirectTo('/introduction');
+        })
+        .catch((error) => {
+          this.errorMessage = error.response.data;
+        });
     },
     redirectTo(url) {
       this.$router.push({ path: url });

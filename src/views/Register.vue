@@ -17,12 +17,29 @@
             </div>
             <div class="form-input">
               <Field
+                v-model="email"
                 name="email"
                 class="input col-8"
                 placeholder="example@gmail.com"
               />
-              <div class="input-error" v-if="errors.email">
-                <i class="fas fa-times-circle"></i>{{ errors.email }}
+              <div
+                class="input-error"
+                v-if="
+                  errors.email ||
+                  (errorMessage.email && errorMessage.email.length > 0)
+                "
+              >
+                <i class="fas fa-times-circle"></i>
+                <div>
+                  <span v-if="errors.email">
+                    {{ errors.email }}
+                  </span>
+                  <span
+                    v-if="errorMessage.email && errorMessage.email.length > 0"
+                  >
+                    {{ errorMessage.email[0] }}
+                  </span>
+                </div>
               </div>
             </div>
             <div class="title">
@@ -31,14 +48,33 @@
             </div>
             <div class="form-input form-password">
               <Field
+                v-model="password"
                 name="password"
                 :type="showPassword ? 'text' : 'password'"
                 class="input col-8"
                 placeholder="6-18位數密碼，請區分大小寫"
               />
               <span class="togglePassword" @click="togglePassword"> 顯示 </span>
-              <div class="input-error" v-if="errors.password">
-                <i class="fas fa-times-circle"></i>{{ errors.password }}
+              <div
+                class="input-error"
+                v-if="
+                  errors.password ||
+                  (errorMessage.password && errorMessage.password.length > 0)
+                "
+              >
+                <i class="fas fa-times-circle"></i>
+                <div>
+                  <span v-if="errors.password">
+                    {{ errors.password }}
+                  </span>
+                  <span
+                    v-if="
+                      errorMessage.password && errorMessage.password.length > 0
+                    "
+                  >
+                    {{ errorMessage.password[0] }}
+                  </span>
+                </div>
               </div>
             </div>
             <div class="title">
@@ -66,12 +102,32 @@
                   <h3 class="color-primary">請輸入您的暱稱</h3>
                 </div>
                 <Field
+                  v-model="nickname"
                   name="nickname"
                   class="input input-auto"
                   placeholder="輸入您的暱稱"
                 />
-                <div class="input-error" v-if="errors.nickname">
-                  <i class="fas fa-times-circle"></i>{{ errors.nickname }}
+                <div
+                  class="input-error"
+                  v-if="
+                    errors.nickname ||
+                    (errorMessage.nickname && errorMessage.nickname.length > 0)
+                  "
+                >
+                  <i class="fas fa-times-circle"></i>
+                  <div>
+                    <span v-if="errors.nickname">
+                      {{ errors.nickname }}
+                    </span>
+                    <span
+                      v-if="
+                        errorMessage.nickname &&
+                        errorMessage.nickname.length > 0
+                      "
+                    >
+                      {{ errorMessage.nickname[0] }}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div>
@@ -80,12 +136,33 @@
                   <h3 class="color-primary">請輸入您的購票序號</h3>
                 </div>
                 <Field
-                  name="ticketId"
+                  v-model="ticket_number"
+                  name="ticket_number"
                   class="input input-auto"
                   placeholder="輸入您的購票序號"
                 />
-                <div class="input-error" v-if="errors.ticketId">
-                  <i class="fas fa-times-circle"></i>{{ errors.ticketId }}
+                <div
+                  class="input-error"
+                  v-if="
+                    errors.ticket_number ||
+                    (errorMessage.ticket_number &&
+                      errorMessage.ticket_number.length > 0)
+                  "
+                >
+                  <i class="fas fa-times-circle"></i>
+                  <div>
+                    <span v-if="errors.ticket_number">
+                      {{ errors.ticket_number }}
+                    </span>
+                    <span
+                      v-if="
+                        errorMessage.ticket_number &&
+                        errorMessage.ticket_number.length > 0
+                      "
+                    >
+                      {{ errorMessage.ticket_number[0] }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -140,6 +217,7 @@
         <Field
           v-model="checkPolicy"
           id="policy-modal"
+          name="policy-modal"
           type="checkbox"
           class="input"
           value="policy"
@@ -154,6 +232,7 @@
 import Modal from '@/components/Modal';
 import { Field, Form } from 'vee-validate';
 import * as Yup from 'yup';
+import api from '../apis/index';
 export default {
   name: 'Register',
   components: {
@@ -161,6 +240,15 @@ export default {
     Field,
     Form,
   },
+  props: {
+    blackMode: Boolean,
+  },
+  provide() {
+    return {
+      api: api,
+    };
+  },
+  emits: ['canPrevious'],
   setup() {
     const schema = Yup.object().shape({
       email: Yup.string().required('請輸入您的帳號/電子郵件'),
@@ -172,7 +260,7 @@ export default {
         .required('請輸入您的密碼')
         .oneOf([Yup.ref('password')], '請與密碼輸入一致'),
       nickname: Yup.string().required('請輸入您的暱稱'),
-      ticketId: Yup.string().required('請輸入您的購票序號'),
+      ticket_number: Yup.string().required('請輸入您的購票序號'),
       policy: Yup.string().required(),
     });
     return {
@@ -185,6 +273,11 @@ export default {
       showPassword: false,
       showConfirmPassword: false,
       checkPolicy: undefined,
+      email: '',
+      password: '',
+      nickname: '',
+      ticket_number: '',
+      errorMessage: {},
     };
   },
   methods: {
@@ -201,10 +294,27 @@ export default {
     toggleConfirmPassword() {
       this.showConfirmPassword = !this.showConfirmPassword;
     },
-    onSubmit(values) {
-      // TODO: call api
-      console.log(JSON.stringify(values, null, 2));
-      this.redirectTo('/introduction');
+    onSubmit() {
+      const data = {
+        email: this.email,
+        password: this.password,
+        nickname: this.nickname,
+        ticket_number: this.ticket_number,
+      };
+      api.auth
+        .register(data)
+        .then((response) => {
+          let res = response.data;
+
+          this.$store.dispatch('auth/setAuth', {
+            token: res.data.token_type + ' ' + res.data.access_token,
+          });
+
+          this.redirectTo('/introduction');
+        })
+        .catch((error) => {
+          this.errorMessage = error.response.data;
+        });
     },
     redirectTo(url) {
       this.$router.push({ path: url });

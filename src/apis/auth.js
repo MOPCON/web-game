@@ -7,6 +7,9 @@ const auth = {
   login(params) {
     return req('post', '/login', params);
   },
+  me() {
+    return req('get', '/me');
+  },
 };
 
 export default auth;

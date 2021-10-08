@@ -5,46 +5,59 @@
         <div class="orange-hr" />
         <div class="image">
           <div class="flow-chart flow-chart-extend">
-            <div class="line line-orange" />
-            <i class="fas fa-check-circle orange"></i>
-            <div class="line line-orange" />
-            <div class="mo-circle">
-              <img src="@/assets/images/mo-circle.jpg" width="24" />
-              <div class="notify">恭喜答對了！繼續挑戰下一關吧</div>
-            </div>
-            <div class="line" />
-            <i class="far fa-circle"></i>
-            <div class="line" />
-            <i class="far fa-circle"></i>
-            <div class="line line-orange">
-              <div class="mo-circle">
+            <div
+              v-for="(mission, missionIndex) in missionList"
+              :key="mission.uid"
+              class="flow"
+            >
+              <div
+                class="line"
+                :class="{ 'line-orange': missionIndex <= currentMissionIndex }"
+              />
+              <div v-if="missionIndex == currentMissionIndex" class="mo-circle">
                 <img src="@/assets/images/mo-circle.jpg" width="24" />
+                <div
+                  v-if="
+                    currentMissionIndex > 0 && lastIndex != currentMissionIndex
+                  "
+                  class="notify"
+                >
+                  恭喜答對了！繼續挑戰下一關吧
+                </div>
+                <div v-if="(lastIndex = currentMissionIndex)" class="notify">
+                  恭喜完成所有挑戰！
+                </div>
               </div>
-            </div>
-            <div class="gift line-orange">
-              <i class="fas fa-gift"></i>
-              <div class="notify">恭喜答對了！繼續挑戰下一關吧</div>
-            </div>
-            <div class="line line-orange" />
-            <div class="gift orange"><i class="fas fa-gift"></i></div>
-            <div class="line" />
-            <div class="gift"><i class="fas fa-gift"></i></div>
-            <div class="line" />
-            <div class="mo-circle">
-              <img src="@/assets/images/mo-circle.jpg" width="24" />
-              <div class="notify">恭喜完成所有挑戰！</div>
+              <i
+                v-if="
+                  missionIndex != currentMissionIndex &&
+                  missionIndex != giftIndex
+                "
+                :class="{
+                  'fas fa-check-circle orange':
+                    missionIndex < currentMissionIndex,
+                  'far fa-circle': missionIndex >= currentMissionIndex,
+                }"
+              ></i>
+              <div
+                v-if="missionIndex == giftIndex"
+                class="gift"
+                :class="{ orange: missionIndex < currentMissionIndex }"
+              >
+                <i class="fas fa-gift"></i>
+              </div>
             </div>
           </div>
         </div>
         <div class="orange-hr" />
         <div class="content">
           <p>
-            當你終於到達了臭蟲帝國之後，發現這裡的王宮戒備森嚴，於是決定等到晚上再作打算。一路上風塵僕僕，你已經餓扁了。因此，你急需找一點食物，剛好有人跟你說，某個地方需要你去做一份工作，為了食物，你只好姑且一試...
+            {{ this.currentMission.description }}
           </p>
           <div class="button-area">
-            <div class="btn btn-black" @click="openModal('prize')">
+            <!-- <div class="btn btn-black" @click="openModal('prize')">
               領取獎品<i class="fas fa-arrow-right"></i>
-            </div>
+            </div> -->
             <div class="btn btn-black" @click="openModal('task')">
               挑戰遊戲<i class="fas fa-arrow-right"></i>
             </div>
@@ -141,12 +154,18 @@
 import Modal from '@/components/Modal';
 import { Field, Form } from 'vee-validate';
 import * as Yup from 'yup';
+import api from '../apis/index';
 export default {
   name: 'Game',
   components: {
     Modal,
     Field,
     Form,
+  },
+  provide() {
+    return {
+      api: api,
+    };
   },
   setup() {
     const schema = Yup.object().shape({
@@ -163,7 +182,14 @@ export default {
     return {
       modalOpen: false,
       modalType: 'task',
+      missionList: {},
+      currentMissionIndex: 0,
+      giftIndex: 6,
+      lastIndex: 11,
     };
+  },
+  created() {
+    this.getMeData();
   },
   emits: ['canPrevious'],
   methods: {
@@ -188,6 +214,20 @@ export default {
     },
     downloadPrize() {
       console.log('download prize');
+    },
+    getMeData() {
+      api.auth
+        .me()
+        .then((response) => {
+          let res = response.data;
+          console.log(res);
+          this.missionList = res.data.mission_list;
+          this.currentMissionIndex = parseInt(res.data.current_mission) - 1;
+          this.currentMission = this.missionList[this.currentMissionIndex];
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
   },
 };
@@ -225,6 +265,10 @@ export default {
       width: 100%;
       height: 80px;
       background: rgba(0, 0, 0, 0.4);
+      .flow {
+        @include flex(normal, row, center);
+        width: 100%;
+      }
       .line {
         width: 100%;
         height: 4px;
@@ -293,7 +337,7 @@ export default {
         top: 30px;
         left: -110px;
       }
-      .mo-circle:last-child .notify {
+      .flow:last-child .mo-circle .notify {
         left: -144px;
         width: 168px;
       }

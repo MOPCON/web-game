@@ -77,6 +77,12 @@
                 </div>
               </div>
             </div>
+            <div class="input-error" v-if="message != ''">
+              <i class="fas fa-times-circle"></i>
+              <span>
+                {{ message }}
+              </span>
+            </div>
             <div class="btn-area">
               <button class="btn btn-orange">
                 登入<i class="fas fa-long-arrow-alt-right"></i>
@@ -122,6 +128,7 @@ export default {
       email: '',
       password: '',
       errorMessage: {},
+      message: '',
     };
   },
   methods: {
@@ -146,6 +153,7 @@ export default {
         })
         .catch((error) => {
           this.errorMessage = error.response.data;
+          this.message = '請確認帳號或密碼是否正確';
         });
     },
     redirectTo(url) {

@@ -1,5 +1,16 @@
 import axios from 'axios';
 import store from '../store';
+import router from '../router';
+
+const errorHandle = (status) => {
+  if (status === 401) {
+    store.dispatch('auth/setAuth', {
+      token: '',
+    });
+
+    router.replace('/');
+  }
+};
 
 var instance = axios.create({
   baseURL: process.env.VUE_APP_PROXY_URL + '/',
@@ -12,6 +23,19 @@ instance.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+instance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    const { response } = error;
+    if (response) {
+      errorHandle(response.status);
+    }
     return Promise.reject(error);
   }
 );

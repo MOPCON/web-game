@@ -16,16 +16,8 @@
               />
               <div v-if="missionIndex == currentMissionIndex" class="mo-circle">
                 <img src="@/assets/images/mo-circle.jpg" width="24" />
-                <div
-                  v-if="
-                    currentMissionIndex > 0 && lastIndex != currentMissionIndex
-                  "
-                  class="notify"
-                >
-                  恭喜答對了！繼續挑戰下一關吧
-                </div>
-                <div v-if="(lastIndex = currentMissionIndex)" class="notify">
-                  恭喜完成所有挑戰！
+                <div v-if="moMessage != ''" class="notify">
+                  {{ moMessage }}
                 </div>
               </div>
               <i
@@ -96,34 +88,44 @@
       </div>
     </div>
     <Form
-      v-if="modalType === 'task'"
+      v-if="modalType === 'task' && answerList.length > 0"
       @submit="onSubmit"
-      v-slot="{ errors }"
-      :validation-schema="schema"
       class="modal-body"
     >
-      <div>
-        <div class="title">
-          <img src="@/assets/images/title-tag.svg" />
-          <h3>提示</h3>
-        </div>
-        <p>請找到並前往攤位 A 完成任務。</p>
-      </div>
-      <div>
-        <div class="title">
-          <img src="@/assets/images/title-tag.svg" />
-          <h3>題目</h3>
-        </div>
-        <p>請問做完這份工作後，你得到幾個 MO 幣？</p>
-      </div>
-      <div>
-        <div class="title">
-          <img src="@/assets/images/title-tag.svg" />
-          <h3>請輸入您的答案</h3>
-        </div>
-        <Field name="answer" class="input col-10" placeholder="輸入您的答案" />
-        <div class="input-error" v-if="errors.answer">
-          <i class="fas fa-times-circle"></i>{{ errors.answer }}
+      <div class="question-list">
+        <div
+          v-for="(question, questionIndex) in questionList"
+          :key="question.name"
+          class="question"
+        >
+          <div class="title">
+            <img src="@/assets/images/title-tag.svg" />
+            <h3>提示</h3>
+          </div>
+          <p>{{ question.description }}</p>
+          <div class="title">
+            <img src="@/assets/images/title-tag.svg" />
+            <h3>題目</h3>
+          </div>
+          <p>{{ question.name }}</p>
+          <div class="title">
+            <img src="@/assets/images/title-tag.svg" />
+            <h3>請輸入您的答案</h3>
+          </div>
+          <Field
+            v-model="answerList[questionIndex].vkey"
+            :name="'answer' + questionIndex"
+            class="input"
+            :class="{
+              'col-10': questionList.length == 1,
+              'input-auto': questionList.length > 1,
+            }"
+            placeholder="輸入您的答案"
+          />
+          <div class="input-error" v-show="answerList[questionIndex].message">
+            <i class="fas fa-times-circle"></i
+            >{{ answerList[questionIndex].message }}
+          </div>
         </div>
       </div>
       <div class="button-area">
@@ -153,7 +155,6 @@
 <script>
 import Modal from '@/components/Modal';
 import { Field, Form } from 'vee-validate';
-import * as Yup from 'yup';
 import api from '../apis/index';
 export default {
   name: 'Game',
@@ -167,14 +168,6 @@ export default {
       api: api,
     };
   },
-  setup() {
-    const schema = Yup.object().shape({
-      answer: Yup.string().required('請檢查您的答案'),
-    });
-    return {
-      schema,
-    };
-  },
   props: {
     blackMode: Boolean,
   },
@@ -183,13 +176,18 @@ export default {
       modalOpen: false,
       modalType: 'task',
       missionList: {},
+      moMessage: '',
+      currentMission: {},
       currentMissionIndex: 0,
       giftIndex: 6,
-      lastIndex: 11,
+      lastIndex: 0,
+      questionList: [],
+      answerList: [],
     };
   },
   created() {
     this.getMeData();
+    this.$emit('can-previous', true);
   },
   emits: ['canPrevious'],
   methods: {
@@ -207,10 +205,35 @@ export default {
     closeModal(show) {
       this.modalOpen = show;
     },
-    onSubmit(values) {
-      // TODO: call api
-      console.log(JSON.stringify(values, null, 2));
-      this.redirectTo('/reward');
+    onSubmit() {
+      const data = {
+        answer: this.answerList,
+      };
+      this.moMessage = '';
+
+      api.game
+        .verify('question', data)
+        .then((response) => {
+          let res = response.data;
+          let isPass = true;
+          for (let i = 0; i < this.answerList.length; i++) {
+            this.answerList[i].message = res.message[i].message;
+            this.answerList[i].pass = res.message[i].pass;
+            if (!this.answerList[i].pass) {
+              isPass = false;
+            }
+          }
+
+          if (isPass) {
+            this.nextMission();
+            this.closeModal(false);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      // this.redirectTo('/reward');
     },
     downloadPrize() {
       console.log('download prize');
@@ -219,15 +242,70 @@ export default {
       api.auth
         .me()
         .then((response) => {
+          this.missionList = Object.assign({}, this.missionList);
           let res = response.data;
-          console.log(res);
           this.missionList = res.data.mission_list;
           this.currentMissionIndex = parseInt(res.data.current_mission) - 1;
           this.currentMission = this.missionList[this.currentMissionIndex];
+          this.lastIndex = this.missionList.length;
+          this.getTaskData();
         })
         .catch((error) => {
           console.log(error);
         });
+    },
+    getTaskData() {
+      let uid = this.currentMission.uid;
+      api.game
+        .getTask(uid)
+        .then((response) => {
+          let res = response.data;
+          this.questionList = res.data[0].questions;
+          this.answerList = {};
+          setTimeout(() => {
+            this.answerList = this.questionList.map(function (item) {
+              return {
+                uid: item.uid,
+                vkey: '',
+                message: '',
+                pass: false,
+              };
+            });
+          }, 0);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    previousPage() {
+      this.moMessage = '';
+      if (this.currentMissionIndex == 0) {
+        this.redirectTo('/introduction');
+      } else {
+        this.currentMissionIndex--;
+        this.currentMission = this.missionList[this.currentMissionIndex];
+        this.getTaskData();
+        const missionList = this.missionList;
+        this.missionList = [];
+        setTimeout(() => {
+          this.missionList = missionList;
+        }, 0);
+      }
+    },
+    nextMission() {
+      this.currentMissionIndex++;
+      this.currentMission = this.missionList[this.currentMissionIndex];
+      this.getTaskData();
+      const missionList = this.missionList;
+      this.missionList = [];
+      if (this.currentMissionIndex === this.lastIndex) {
+        this.moMessage = '恭喜完成所有挑戰！';
+      } else {
+        this.moMessage = '恭喜答對了！繼續挑戰下一關吧';
+      }
+      setTimeout(() => {
+        this.missionList = missionList;
+      }, 0);
     },
   },
 };
@@ -387,14 +465,21 @@ export default {
   }
   .modal-body {
     @include flex(normal, column, center);
+    .question-list {
+      @include flex;
+    }
+    .question + .question {
+      margin-left: 2rem;
+    }
     .title {
       @include flex;
-      width: 450px;
+      width: 100%;
       h3 {
         margin-left: 0.5rem;
       }
     }
     p {
+      width: 100%;
       margin-top: 0.5rem;
       margin-bottom: 1.5rem;
       color: $colorWhite;

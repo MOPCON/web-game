@@ -47,11 +47,36 @@
             {{ this.currentMission.description }}
           </p>
           <div class="button-area">
-            <!-- <div class="btn btn-black" @click="openModal('prize')">
-              領取獎品<i class="fas fa-arrow-right"></i>
-            </div> -->
-            <div class="btn btn-black" @click="openModal('task')">
+            <div
+              v-if="
+                currentMissionIndex != giftIndex &&
+                currentMissionIndex != lastIndex
+              "
+              class="btn btn-black"
+              @click="openModal('task')"
+            >
               挑戰遊戲<i class="fas fa-arrow-right"></i>
+            </div>
+            <div
+              v-if="currentMissionIndex == giftIndex"
+              class="btn btn-black"
+              @click="openModal('prize')"
+            >
+              領取獎品<i class="fas fa-arrow-right"></i>
+            </div>
+            <div
+              v-if="currentMissionIndex == giftIndex"
+              class="btn btn-black"
+              @click="continueMission()"
+            >
+              繼續拯救<i class="fas fa-arrow-right"></i>
+            </div>
+            <div
+              v-if="currentMissionIndex == lastIndex"
+              class="btn btn-black"
+              @click="redirectTo('/reward')"
+            >
+              參加抽獎<i class="fas fa-arrow-right"></i>
             </div>
           </div>
         </div>
@@ -138,15 +163,15 @@
           <img src="@/assets/images/title-tag.svg" />
           <h3>提示</h3>
         </div>
-        <p>
-          這裡是遊戲的中繼站，挑戰到這裡辛苦啦！
-          為了好好獎賞努力玩大地遊戲的大家，今年 MOPCON
-          特別提供數位獎品讓你下載哦！ btw 如果繼續挑戰，把 Mosume
-          解救出來的話，將有機會獲得更棒的神秘獎勵唷！
-        </p>
+        <p>{{ questionList[0].description }}</p>
       </div>
       <div class="button-area">
-        <div class="btn btn-black" @click="downloadPrize()">下載獎品</div>
+        <div
+          class="btn btn-black"
+          @click="downloadPrize(questionList[0].uid, questionList[0].name)"
+        >
+          下載獎品
+        </div>
       </div>
     </div>
   </Modal>
@@ -205,38 +230,29 @@ export default {
     closeModal(show) {
       this.modalOpen = show;
     },
+    openWindow(url) {
+      window.open(url);
+    },
     onSubmit() {
       const data = {
         answer: this.answerList,
       };
       this.moMessage = '';
-
-      api.game
-        .verify('question', data)
-        .then((response) => {
-          let res = response.data;
-          let isPass = true;
-          for (let i = 0; i < this.answerList.length; i++) {
-            this.answerList[i].message = res.message[i].message;
-            this.answerList[i].pass = res.message[i].pass;
-            if (!this.answerList[i].pass) {
-              isPass = false;
-            }
-          }
-
-          if (isPass) {
-            this.nextMission();
-            this.closeModal(false);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-
-      // this.redirectTo('/reward');
+      this.verify(data);
     },
-    downloadPrize() {
-      console.log('download prize');
+    downloadPrize(url) {
+      this.openWindow(url);
+    },
+    continueMission(uid) {
+      const data = {
+        answer: [
+          {
+            uid: uid,
+            vkey: '',
+          },
+        ],
+      };
+      this.verify(data);
     },
     getMeData() {
       api.auth
@@ -247,7 +263,7 @@ export default {
           this.missionList = res.data.mission_list;
           this.currentMissionIndex = parseInt(res.data.current_mission) - 1;
           this.currentMission = this.missionList[this.currentMissionIndex];
-          this.lastIndex = this.missionList.length;
+          this.lastIndex = this.missionList.length - 1;
           this.getTaskData();
         })
         .catch((error) => {
@@ -306,6 +322,29 @@ export default {
       setTimeout(() => {
         this.missionList = missionList;
       }, 0);
+    },
+    verify(data) {
+      api.game
+        .verify('question', data)
+        .then((response) => {
+          let res = response.data;
+          let isPass = true;
+          for (let i = 0; i < this.answerList.length; i++) {
+            this.answerList[i].message = res.message[i].message;
+            this.answerList[i].pass = res.message[i].pass;
+            if (!this.answerList[i].pass) {
+              isPass = false;
+            }
+          }
+
+          if (isPass) {
+            this.nextMission();
+            this.closeModal(false);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
   },
 };
@@ -468,18 +507,24 @@ export default {
     .question-list {
       @include flex;
     }
+    .question {
+      .title {
+        width: 100%;
+      }
+      p {
+        width: 100%;
+      }
+    }
     .question + .question {
       margin-left: 2rem;
     }
     .title {
       @include flex;
-      width: 100%;
       h3 {
         margin-left: 0.5rem;
       }
     }
     p {
-      width: 100%;
       margin-top: 0.5rem;
       margin-bottom: 1.5rem;
       color: $colorWhite;

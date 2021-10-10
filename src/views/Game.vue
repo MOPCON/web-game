@@ -4,42 +4,79 @@
       <div class="area">
         <div class="orange-hr" />
         <div class="image">
-          <div class="flow-chart">
-            <div class="line line-orange" />
-            <i class="fas fa-check-circle orange"></i>
-            <div class="line line-orange" />
-            <div class="mo-circle">
-              <img src="@/assets/images/mo-circle.jpg" width="24" />
-            </div>
-            <div class="line line-orange">
-              <div class="mo-circle">
+          <div class="flow-chart flow-chart-extend">
+            <div
+              v-for="(mission, missionIndex) in missionList"
+              :key="mission.uid"
+              class="flow"
+            >
+              <div
+                class="line"
+                :class="{ 'line-orange': missionIndex <= currentMissionIndex }"
+              />
+              <div v-if="missionIndex == currentMissionIndex" class="mo-circle">
                 <img src="@/assets/images/mo-circle.jpg" width="24" />
+                <div v-if="moMessage != ''" class="notify">
+                  {{ moMessage }}
+                </div>
+              </div>
+              <i
+                v-if="
+                  missionIndex != currentMissionIndex &&
+                  missionIndex != giftIndex
+                "
+                :class="{
+                  'fas fa-check-circle orange':
+                    missionIndex < currentMissionIndex,
+                  'far fa-circle': missionIndex >= currentMissionIndex,
+                }"
+              ></i>
+              <div
+                v-if="missionIndex == giftIndex"
+                class="gift"
+                :class="{ orange: missionIndex < currentMissionIndex }"
+              >
+                <i class="fas fa-gift"></i>
               </div>
             </div>
-            <div class="gift orange"><i class="fas fa-gift"></i></div>
-            <div class="line" />
-            <i class="far fa-circle"></i>
-            <div class="line" />
-            <i class="far fa-circle"></i>
-            <div class="line" />
-            <div class="gift"><i class="fas fa-gift"></i></div>
-            <div class="line" />
-            <i class="far fa-circle"></i>
-            <div class="line" />
-            <i class="far fa-circle"></i>
           </div>
         </div>
         <div class="orange-hr" />
         <div class="content">
           <p>
-            當你終於到達了臭蟲帝國之後，發現這裡的王宮戒備森嚴，於是決定等到晚上再作打算。一路上風塵僕僕，你已經餓扁了。因此，你急需找一點食物，剛好有人跟你說，某個地方需要你去做一份工作，為了食物，你只好姑且一試...
+            {{ this.currentMission.description }}
           </p>
           <div class="button-area">
-            <div class="btn btn-black" @click="openModal('prize')">
+            <div
+              v-if="
+                currentMissionIndex != giftIndex &&
+                currentMissionIndex != lastIndex
+              "
+              class="btn btn-black"
+              @click="openModal('task')"
+            >
+              挑戰遊戲<i class="fas fa-arrow-right"></i>
+            </div>
+            <div
+              v-if="currentMissionIndex == giftIndex"
+              class="btn btn-black"
+              @click="openModal('prize')"
+            >
               領取獎品<i class="fas fa-arrow-right"></i>
             </div>
-            <div class="btn btn-black" @click="openModal('task')">
-              挑戰遊戲<i class="fas fa-arrow-right"></i>
+            <div
+              v-if="currentMissionIndex == giftIndex"
+              class="btn btn-black"
+              @click="continueMission()"
+            >
+              繼續拯救<i class="fas fa-arrow-right"></i>
+            </div>
+            <div
+              v-if="currentMissionIndex == lastIndex"
+              class="btn btn-black"
+              @click="redirectTo('/reward')"
+            >
+              參加抽獎<i class="fas fa-arrow-right"></i>
             </div>
           </div>
         </div>
@@ -76,34 +113,44 @@
       </div>
     </div>
     <Form
-      v-if="modalType === 'task'"
+      v-if="modalType === 'task' && answerList.length > 0"
       @submit="onSubmit"
-      v-slot="{ errors }"
-      :validation-schema="schema"
       class="modal-body"
     >
-      <div>
-        <div class="title">
-          <img src="@/assets/images/title-tag.svg" />
-          <h3>提示</h3>
-        </div>
-        <p>請找到並前往攤位 A 完成任務。</p>
-      </div>
-      <div>
-        <div class="title">
-          <img src="@/assets/images/title-tag.svg" />
-          <h3>題目</h3>
-        </div>
-        <p>請問做完這份工作後，你得到幾個 MO 幣？</p>
-      </div>
-      <div>
-        <div class="title">
-          <img src="@/assets/images/title-tag.svg" />
-          <h3>請輸入您的答案</h3>
-        </div>
-        <Field name="answer" class="input col-10" placeholder="輸入您的答案" />
-        <div class="input-error" v-if="errors.answer">
-          <i class="fas fa-times-circle"></i>{{ errors.answer }}
+      <div class="question-list">
+        <div
+          v-for="(question, questionIndex) in questionList"
+          :key="question.name"
+          class="question"
+        >
+          <div class="title">
+            <img src="@/assets/images/title-tag.svg" />
+            <h3>提示</h3>
+          </div>
+          <p>{{ question.description }}</p>
+          <div class="title">
+            <img src="@/assets/images/title-tag.svg" />
+            <h3>題目</h3>
+          </div>
+          <p>{{ question.name }}</p>
+          <div class="title">
+            <img src="@/assets/images/title-tag.svg" />
+            <h3>請輸入您的答案</h3>
+          </div>
+          <Field
+            v-model="answerList[questionIndex].vkey"
+            :name="'answer' + questionIndex"
+            class="input"
+            :class="{
+              'col-10': questionList.length == 1,
+              'input-auto': questionList.length > 1,
+            }"
+            placeholder="輸入您的答案"
+          />
+          <div class="input-error" v-show="answerList[questionIndex].message">
+            <i class="fas fa-times-circle"></i
+            >{{ answerList[questionIndex].message }}
+          </div>
         </div>
       </div>
       <div class="button-area">
@@ -116,15 +163,15 @@
           <img src="@/assets/images/title-tag.svg" />
           <h3>提示</h3>
         </div>
-        <p>
-          這裡是遊戲的中繼站，挑戰到這裡辛苦啦！
-          為了好好獎賞努力玩大地遊戲的大家，今年 MOPCON
-          特別提供數位獎品讓你下載哦！ btw 如果繼續挑戰，把 Mosume
-          解救出來的話，將有機會獲得更棒的神秘獎勵唷！
-        </p>
+        <p>{{ questionList[0].description }}</p>
       </div>
       <div class="button-area">
-        <div class="btn btn-black" @click="downloadPrize()">下載獎品</div>
+        <div
+          class="btn btn-black"
+          @click="downloadPrize(questionList[0].uid, questionList[0].name)"
+        >
+          下載獎品
+        </div>
       </div>
     </div>
   </Modal>
@@ -133,7 +180,7 @@
 <script>
 import Modal from '@/components/Modal';
 import { Field, Form } from 'vee-validate';
-import * as Yup from 'yup';
+import api from '../apis/index';
 export default {
   name: 'Game',
   components: {
@@ -141,12 +188,9 @@ export default {
     Field,
     Form,
   },
-  setup() {
-    const schema = Yup.object().shape({
-      answer: Yup.string().required('請檢查您的答案'),
-    });
+  provide() {
     return {
-      schema,
+      api: api,
     };
   },
   props: {
@@ -156,7 +200,19 @@ export default {
     return {
       modalOpen: false,
       modalType: 'task',
+      missionList: {},
+      moMessage: '',
+      currentMission: {},
+      currentMissionIndex: 0,
+      giftIndex: 6,
+      lastIndex: 0,
+      questionList: [],
+      answerList: [],
     };
+  },
+  created() {
+    this.getMeData();
+    this.$emit('can-previous', true);
   },
   emits: ['canPrevious'],
   methods: {
@@ -174,13 +230,121 @@ export default {
     closeModal(show) {
       this.modalOpen = show;
     },
-    onSubmit(values) {
-      // TODO: call api
-      console.log(JSON.stringify(values, null, 2));
-      this.redirectTo('/reward');
+    openWindow(url) {
+      window.open(url);
     },
-    downloadPrize() {
-      console.log('download prize');
+    onSubmit() {
+      const data = {
+        answer: this.answerList,
+      };
+      this.moMessage = '';
+      this.verify(data);
+    },
+    downloadPrize(url) {
+      this.openWindow(url);
+    },
+    continueMission(uid) {
+      const data = {
+        answer: [
+          {
+            uid: uid,
+            vkey: '',
+          },
+        ],
+      };
+      this.verify(data);
+    },
+    getMeData() {
+      api.auth
+        .me()
+        .then((response) => {
+          this.missionList = Object.assign({}, this.missionList);
+          let res = response.data;
+          this.missionList = res.data.mission_list;
+          this.currentMissionIndex = parseInt(res.data.current_mission) - 1;
+          this.currentMission = this.missionList[this.currentMissionIndex];
+          this.lastIndex = this.missionList.length - 1;
+          this.getTaskData();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    getTaskData() {
+      let uid = this.currentMission.uid;
+      api.game
+        .getTask(uid)
+        .then((response) => {
+          let res = response.data;
+          this.questionList = res.data[0].questions;
+          this.answerList = {};
+          setTimeout(() => {
+            this.answerList = this.questionList.map(function (item) {
+              return {
+                uid: item.uid,
+                vkey: '',
+                message: '',
+                pass: false,
+              };
+            });
+          }, 0);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    previousPage() {
+      this.moMessage = '';
+      if (this.currentMissionIndex == 0) {
+        this.redirectTo('/introduction');
+      } else {
+        this.currentMissionIndex--;
+        this.currentMission = this.missionList[this.currentMissionIndex];
+        this.getTaskData();
+        const missionList = this.missionList;
+        this.missionList = [];
+        setTimeout(() => {
+          this.missionList = missionList;
+        }, 0);
+      }
+    },
+    nextMission() {
+      this.currentMissionIndex++;
+      this.currentMission = this.missionList[this.currentMissionIndex];
+      this.getTaskData();
+      const missionList = this.missionList;
+      this.missionList = [];
+      if (this.currentMissionIndex === this.lastIndex) {
+        this.moMessage = '恭喜完成所有挑戰！';
+      } else {
+        this.moMessage = '恭喜答對了！繼續挑戰下一關吧';
+      }
+      setTimeout(() => {
+        this.missionList = missionList;
+      }, 0);
+    },
+    verify(data) {
+      api.game
+        .verify('question', data)
+        .then((response) => {
+          let res = response.data;
+          let isPass = true;
+          for (let i = 0; i < this.answerList.length; i++) {
+            this.answerList[i].message = res.message[i].message;
+            this.answerList[i].pass = res.message[i].pass;
+            if (!this.answerList[i].pass) {
+              isPass = false;
+            }
+          }
+
+          if (isPass) {
+            this.nextMission();
+            this.closeModal(false);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
   },
 };
@@ -218,6 +382,10 @@ export default {
       width: 100%;
       height: 80px;
       background: rgba(0, 0, 0, 0.4);
+      .flow {
+        @include flex(normal, row, center);
+        width: 100%;
+      }
       .line {
         width: 100%;
         height: 4px;
@@ -260,6 +428,10 @@ export default {
           color: $colorWhite;
         }
       }
+      .gift.line-orange {
+        border: 1px solid $colorOrange;
+        background: $colorWhite;
+      }
       .mo-circle {
         width: 26px;
         height: 26px;
@@ -269,11 +441,32 @@ export default {
           border-radius: 11px;
         }
       }
+      .mo-circle .notify,
+      .gift .notify {
+        width: 242px;
+        position: absolute;
+        font-size: 14px;
+        color: orange;
+        background: white;
+        border-radius: 8px;
+        padding: 4px 16px;
+        border: 1px solid #ff9933;
+        top: 30px;
+        left: -110px;
+      }
+      .flow:last-child .mo-circle .notify {
+        left: -144px;
+        width: 168px;
+      }
       .line .mo-circle {
         position: absolute;
         top: -11px;
         right: 0px;
       }
+    }
+    .flow-chart-extend {
+      height: 110px;
+      padding-bottom: 30px;
     }
   }
   .content {
@@ -311,9 +504,22 @@ export default {
   }
   .modal-body {
     @include flex(normal, column, center);
+    .question-list {
+      @include flex;
+    }
+    .question {
+      .title {
+        width: 100%;
+      }
+      p {
+        width: 100%;
+      }
+    }
+    .question + .question {
+      margin-left: 2rem;
+    }
     .title {
       @include flex;
-      width: 450px;
       h3 {
         margin-left: 0.5rem;
       }

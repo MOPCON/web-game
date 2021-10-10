@@ -103,6 +103,12 @@ span {
         color: $colorError;
       }
     }
+    span {
+      @include font(14px, $colorError, 400);
+    }
+    span + span::before {
+      content: '，';
+    }
   }
 }
 

@@ -1,10 +1,13 @@
 <template>
-  <div class="Game game-bg">
+  <div id="Game" class="Game game-bg">
     <div class="container">
       <div class="area">
         <div class="orange-hr" />
         <div class="image">
-          <div class="flow-chart flow-chart-extend">
+          <div
+            class="flow-chart"
+            :class="{ 'flow-chart-extend': moMessage != '' }"
+          >
             <div
               v-for="(mission, missionIndex) in missionList"
               :key="mission.uid"
@@ -22,8 +25,7 @@
               </div>
               <i
                 v-if="
-                  missionIndex != currentMissionIndex &&
-                  missionIndex != giftIndex
+                  missionIndex != currentMissionIndex && mission.uid != giftId
                 "
                 :class="{
                   'fas fa-check-circle orange':
@@ -32,7 +34,7 @@
                 }"
               ></i>
               <div
-                v-if="missionIndex == giftIndex"
+                v-if="mission.uid == giftId"
                 class="gift"
                 :class="{ orange: missionIndex < currentMissionIndex }"
               >
@@ -43,14 +45,23 @@
         </div>
         <div class="orange-hr" />
         <div class="content">
-          <p>
+          <p v-if="!isFinish">
             {{ this.currentMission.description }}
+          </p>
+          <p v-if="isFinish">
+            在蒐集完這三項重要元素後，終於成功說服大魔王遠古神獸-攻城獅將 Mosume
+            公主變回三次元人物，並且順利地把公主從臭蟲帝國拯救出來！
+            當王宮內正歡欣鼓舞地慶祝公主平安回家時，你突然從這個夢中夢裡驚醒過來，發現
+            Mosume 其實是剛剛看的
+            vtuber，而自己也不是王國的衛兵，不過是一個可愛的肥宅而已
+            ...感到失望的你，腦袋裡面全是 Mosume 的聲音，真是魂牽夢縈 ...
+            為了能和她多多親近，你決定「按讚訂閱
+            MOすめ_Mosume_高雄某素梅頻道」，這樣就可以和他一直一直在一起了！
           </p>
           <div class="button-area">
             <div
               v-if="
-                currentMissionIndex != giftIndex &&
-                currentMissionIndex != lastIndex
+                currentMission.uid != giftId && currentMissionIndex != lastIndex
               "
               class="btn btn-black"
               @click="openModal('task')"
@@ -58,23 +69,30 @@
               挑戰遊戲<i class="fas fa-arrow-right"></i>
             </div>
             <div
-              v-if="currentMissionIndex == giftIndex"
+              v-if="currentMission.uid == giftId"
               class="btn btn-black"
               @click="openModal('prize')"
             >
               領取獎品<i class="fas fa-arrow-right"></i>
             </div>
             <div
-              v-if="currentMissionIndex == giftIndex"
+              v-if="currentMission.uid == giftId"
               class="btn btn-black"
               @click="continueMission()"
             >
               繼續拯救<i class="fas fa-arrow-right"></i>
             </div>
             <div
-              v-if="currentMissionIndex == lastIndex"
+              v-if="currentMissionIndex == lastIndex && !isFinish"
               class="btn btn-black"
-              @click="redirectTo('/reward')"
+              @click="openModal('task')"
+            >
+              搜集元素<i class="fas fa-arrow-right"></i>
+            </div>
+            <div
+              v-if="isFinish"
+              class="btn btn-black"
+              @click="openModal('reward')"
             >
               參加抽獎<i class="fas fa-arrow-right"></i>
             </div>
@@ -95,6 +113,7 @@
       </h1>
       <h1 v-if="modalType === 'task'" class="color-orange">挑戰任務</h1>
       <h1 v-if="modalType === 'prize'" class="color-orange">領取獎品</h1>
+      <h1 v-if="modalType === 'reward'" class="color-orange">抽獎方式</h1>
     </div>
     <div class="modal-hr" />
     <div v-if="modalType === 'leave'" class="modal-body">
@@ -114,14 +133,14 @@
     </div>
     <Form
       v-if="modalType === 'task' && answerList.length > 0"
-      @submit="onSubmit"
+      @submit="continueMission"
       class="modal-body"
     >
       <div class="question-list">
         <div
           v-for="(question, questionIndex) in questionList"
           :key="question.name"
-          class="question"
+          :class="{ question: questionList.length > 1 }"
         >
           <div class="title">
             <img src="@/assets/images/title-tag.svg" />
@@ -163,7 +182,12 @@
           <img src="@/assets/images/title-tag.svg" />
           <h3>提示</h3>
         </div>
-        <p>{{ questionList[0].description }}</p>
+        <p>
+          這裡是遊戲的中繼站，挑戰到這裡辛苦啦！
+          為了好好獎賞努力玩大地遊戲的大家，今年 MOPCON
+          特別提供數位獎品讓你下載哦！ btw 如果繼續挑戰，把 Mosume
+          解救出來的話，將有機會獲得更棒的神秘獎勵唷！
+        </p>
       </div>
       <div class="button-area">
         <div
@@ -172,6 +196,28 @@
         >
           下載獎品
         </div>
+      </div>
+    </div>
+    <div v-if="modalType === 'reward'" class="modal-body">
+      <div>
+        <div class="title">
+          <img src="@/assets/images/title-tag.svg" />
+          <h3>Step 1</h3>
+        </div>
+        <p>請將結局畫面截圖</p>
+        <div class="title">
+          <img src="@/assets/images/title-tag.svg" />
+          <h3>Step 2</h3>
+        </div>
+        <p>上傳至粉專置頂貼文</p>
+        <div class="title">
+          <img src="@/assets/images/title-tag.svg" />
+          <h3>Step 3</h3>
+        </div>
+        <p>就有機會獲得 MOPCON 2021 各項精美紀念品！！</p>
+      </div>
+      <div class="button-area">
+        <div class="btn btn-black" @click="redirectTo('/reward')">立即參加</div>
       </div>
     </div>
   </Modal>
@@ -204,8 +250,9 @@ export default {
       moMessage: '',
       currentMission: {},
       currentMissionIndex: 0,
-      giftIndex: 6,
+      giftId: '',
       lastIndex: 0,
+      isFinish: false,
       questionList: [],
       answerList: [],
     };
@@ -233,37 +280,26 @@ export default {
     openWindow(url) {
       window.open(url);
     },
-    onSubmit() {
+    downloadPrize(url) {
+      this.openWindow(url);
+    },
+    continueMission() {
       const data = {
         answer: this.answerList,
       };
       this.moMessage = '';
       this.verify(data);
     },
-    downloadPrize(url) {
-      this.openWindow(url);
-    },
-    continueMission(uid) {
-      const data = {
-        answer: [
-          {
-            uid: uid,
-            vkey: '',
-          },
-        ],
-      };
-      this.verify(data);
-    },
     getMeData() {
       api.auth
         .me()
         .then((response) => {
-          this.missionList = Object.assign({}, this.missionList);
           let res = response.data;
           this.missionList = res.data.mission_list;
           this.currentMissionIndex = parseInt(res.data.current_mission) - 1;
           this.currentMission = this.missionList[this.currentMissionIndex];
           this.lastIndex = this.missionList.length - 1;
+          this.giftId = res.data.gift_mission;
           this.getTaskData();
         })
         .catch((error) => {
@@ -303,25 +339,32 @@ export default {
         this.getTaskData();
         const missionList = this.missionList;
         this.missionList = [];
+        this.scrollToId('Game');
         setTimeout(() => {
           this.missionList = missionList;
         }, 0);
       }
     },
     nextMission() {
-      this.currentMissionIndex++;
-      this.currentMission = this.missionList[this.currentMissionIndex];
-      this.getTaskData();
-      const missionList = this.missionList;
-      this.missionList = [];
-      if (this.currentMissionIndex === this.lastIndex) {
-        this.moMessage = '恭喜完成所有挑戰！';
+      if (this.currentMissionIndex == this.lastIndex) {
+        this.isFinish = true;
+        this.scrollToId('Game');
       } else {
-        this.moMessage = '恭喜答對了！繼續挑戰下一關吧';
+        this.currentMissionIndex++;
+        this.currentMission = this.missionList[this.currentMissionIndex];
+        this.getTaskData();
+        const missionList = this.missionList;
+        this.missionList = [];
+        if (this.currentMissionIndex === this.lastIndex) {
+          this.moMessage = '恭喜完成所有挑戰！';
+        } else {
+          this.moMessage = '恭喜答對了！繼續挑戰下一關吧';
+        }
+        this.scrollToId('Game');
+        setTimeout(() => {
+          this.missionList = missionList;
+        }, 0);
       }
-      setTimeout(() => {
-        this.missionList = missionList;
-      }, 0);
     },
     verify(data) {
       api.game
@@ -345,6 +388,10 @@ export default {
         .catch((error) => {
           console.log(error);
         });
+    },
+    scrollToId(id) {
+      const element = document.getElementById(id);
+      element.scrollIntoView({ behavior: 'smooth' });
     },
   },
 };
@@ -508,6 +555,7 @@ export default {
       @include flex;
     }
     .question {
+      flex: 1;
       .title {
         width: 100%;
       }

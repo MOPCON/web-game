@@ -18,7 +18,7 @@
                 :class="{ 'line-orange': missionIndex <= currentMissionIndex }"
               />
               <div v-if="missionIndex == currentMissionIndex" class="mo-circle">
-                <img src="@/assets/images/mo-circle.jpg" width="24" />
+                <img src="@/assets/images/mo/circle.jpg" width="24" />
                 <div v-if="moMessage != ''" class="notify">
                   {{ moMessage }}
                 </div>
@@ -42,6 +42,12 @@
               </div>
             </div>
           </div>
+          <img
+            v-if="currentMission.image && !isFinish"
+            class="bg"
+            :src="getImgUrl(currentMission.image)"
+          />
+          <img v-if="isFinish" class="bg" :src="getImgUrl('bg-13.png')" />
         </div>
         <div class="orange-hr" />
         <div class="content">
@@ -393,6 +399,9 @@ export default {
       const element = document.getElementById(id);
       element.scrollIntoView({ behavior: 'smooth' });
     },
+    getImgUrl(pic) {
+      return require('@/assets/images/game/' + pic);
+    },
   },
 };
 </script>
@@ -421,14 +430,17 @@ export default {
   }
   .image {
     width: 100%;
-    height: 700px;
-    background-color: rgb(73, 73, 73);
+    .bg {
+      width: 100%;
+      vertical-align: middle;
+    }
     .flow-chart {
       @include flex(normal, row, center);
       position: absolute;
       width: 100%;
       height: 80px;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1;
       .flow {
         @include flex(normal, row, center);
         width: 100%;

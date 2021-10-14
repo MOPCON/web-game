@@ -4,6 +4,11 @@
       <div class="area">
         <div class="orange-hr" />
         <div class="image">
+          <img
+            v-if="introduction.image"
+            class="bg"
+            :src="getImgUrl(introduction.image)"
+          />
           <h3 class="image-title">{{ this.introduction.name }}</h3>
         </div>
         <div class="orange-hr" />
@@ -111,6 +116,9 @@ export default {
     closeModal(show) {
       this.modalOpen = show;
     },
+    getImgUrl(pic) {
+      return require('@/assets/images/game/' + pic);
+    },
   },
 };
 </script>
@@ -139,8 +147,10 @@ export default {
   }
   .image {
     width: 100%;
-    height: 700px;
-    background-color: rgb(73, 73, 73);
+    .bg {
+      width: 100%;
+      vertical-align: middle;
+    }
     &-title {
       top: 0.5rem;
       position: absolute;

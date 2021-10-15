@@ -248,7 +248,7 @@ export default {
       api: api,
     };
   },
-  emits: ['canPrevious'],
+  emits: ['canPrevious', 'showLoading'],
   setup() {
     const schema = Yup.object().shape({
       email: Yup.string().required('請輸入您的帳號/電子郵件'),
@@ -295,6 +295,7 @@ export default {
       this.showConfirmPassword = !this.showConfirmPassword;
     },
     onSubmit() {
+      this.$emit('showLoading', true);
       const data = {
         email: this.email,
         password: this.password,
@@ -314,6 +315,9 @@ export default {
         })
         .catch((error) => {
           this.errorMessage = error.response.data;
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
         });
     },
     redirectTo(url) {

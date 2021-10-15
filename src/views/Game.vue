@@ -284,9 +284,9 @@ export default {
   },
   created() {
     this.getMeData();
-    this.$emit('can-previous', true);
+    this.$emit('canPrevious', true);
   },
-  emits: ['canPrevious'],
+  emits: ['canPrevious', 'showLoading'],
   methods: {
     redirectTo(url) {
       this.$router.push({ path: url });
@@ -309,6 +309,7 @@ export default {
       this.openWindow(url);
     },
     continueMission() {
+      this.$emit('showLoading', true);
       if (this.descriptionIndex === this.descriptionLastIndex) {
         const data = {
           answer: this.answerList,
@@ -317,9 +318,11 @@ export default {
         this.verify(data);
       } else {
         this.descriptionIndex++;
+        this.$emit('showLoading', false);
       }
     },
     getMeData() {
+      this.$emit('showLoading', true);
       api.auth
         .me()
         .then((response) => {
@@ -358,12 +361,17 @@ export default {
         })
         .catch((error) => {
           console.log(error);
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
         });
     },
     previousPage() {
+      this.$emit('showLoading', true);
       this.moMessage = '';
       if (this.descriptionIndex != 0) {
         this.descriptionIndex--;
+        this.$emit('showLoading', false);
       } else if (this.currentMissionIndex == 0) {
         this.redirectTo('/introduction');
       } else {
@@ -381,6 +389,7 @@ export default {
       }
     },
     nextMission() {
+      this.$emit('showLoading', true);
       if (this.currentMissionIndex == this.lastIndex) {
         this.isFinish = true;
         this.scrollToId('Game');
@@ -424,6 +433,9 @@ export default {
         })
         .catch((error) => {
           console.log(error);
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
         });
     },
     scrollToId(id) {

@@ -102,7 +102,7 @@ export default {
   props: {
     blackMode: Boolean,
   },
-  emits: ['canPrevious'],
+  emits: ['canPrevious', 'showLoading'],
   created() {
     this.getMeData();
   },
@@ -121,6 +121,7 @@ export default {
       window.open(url);
     },
     getMeData() {
+      this.$emit('showLoading', true);
       api.auth
         .me()
         .then((response) => {
@@ -134,6 +135,9 @@ export default {
         })
         .catch((error) => {
           console.log(error);
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
         });
     },
   },

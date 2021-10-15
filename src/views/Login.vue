@@ -110,6 +110,7 @@ export default {
       api: api,
     };
   },
+  emits: ['canPrevious', 'showLoading'],
   setup() {
     const schema = Yup.object().shape({
       email: Yup.string().required('請輸入您的帳號/電子郵件'),
@@ -136,6 +137,7 @@ export default {
       this.showPassword = !this.showPassword;
     },
     onSubmit() {
+      this.$emit('showLoading', true);
       const data = {
         uid: this.email,
         password: this.password,
@@ -154,6 +156,9 @@ export default {
         .catch((error) => {
           this.errorMessage = error.response.data;
           this.message = '請確認帳號或密碼是否正確';
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
         });
     },
     redirectTo(url) {

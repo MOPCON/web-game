@@ -43,16 +43,16 @@
             </div>
           </div>
           <img
-            v-if="currentMission.image && !isFinish"
+            v-if="currentMission.image != undefined && !isFinish"
             class="bg"
-            :src="getImgUrl(currentMission.image)"
+            :src="getImgUrl(currentMission.image[descriptionIndex])"
           />
           <img v-if="isFinish" class="bg" :src="getImgUrl('bg-13.png')" />
         </div>
         <div class="orange-hr" />
         <div class="content">
-          <p v-if="!isFinish">
-            {{ this.currentMission.description }}
+          <p v-if="currentMission.description != undefined && !isFinish">
+            {{ this.currentMission.description[descriptionIndex] }}
           </p>
           <p v-if="isFinish">
             在蒐集完這三項重要元素後，終於成功說服大魔王遠古神獸-攻城獅將 Mosume
@@ -75,14 +75,31 @@
               挑戰遊戲<i class="fas fa-arrow-right"></i>
             </div>
             <div
-              v-if="currentMission.uid == giftId"
+              v-if="
+                currentMission.uid == giftId &&
+                currentMissionIndex != lastIndex &&
+                descriptionIndex < descriptionLastIndex
+              "
+              class="btn btn-black"
+              @click="continueMission"
+            >
+              點擊繼續<i class="fas fa-arrow-right"></i>
+            </div>
+            <div
+              v-if="
+                currentMission.uid == giftId &&
+                descriptionIndex == descriptionLastIndex
+              "
               class="btn btn-black"
               @click="openModal('prize')"
             >
               領取獎品<i class="fas fa-arrow-right"></i>
             </div>
             <div
-              v-if="currentMission.uid == giftId"
+              v-if="
+                currentMission.uid == giftId &&
+                descriptionIndex == descriptionLastIndex
+              "
               class="btn btn-black"
               @click="continueMission()"
             >
@@ -261,6 +278,8 @@ export default {
       isFinish: false,
       questionList: [],
       answerList: [],
+      descriptionLastIndex: 0,
+      descriptionIndex: 0,
     };
   },
   created() {
@@ -290,11 +309,15 @@ export default {
       this.openWindow(url);
     },
     continueMission() {
-      const data = {
-        answer: this.answerList,
-      };
-      this.moMessage = '';
-      this.verify(data);
+      if (this.descriptionIndex === this.descriptionLastIndex) {
+        const data = {
+          answer: this.answerList,
+        };
+        this.moMessage = '';
+        this.verify(data);
+      } else {
+        this.descriptionIndex++;
+      }
     },
     getMeData() {
       api.auth
@@ -304,6 +327,8 @@ export default {
           this.missionList = res.data.mission_list;
           this.currentMissionIndex = parseInt(res.data.current_mission) - 1;
           this.currentMission = this.missionList[this.currentMissionIndex];
+          this.descriptionLastIndex =
+            this.currentMission.description.length - 1;
           this.lastIndex = this.missionList.length - 1;
           this.giftId = res.data.gift_mission;
           this.getTaskData();
@@ -337,11 +362,15 @@ export default {
     },
     previousPage() {
       this.moMessage = '';
-      if (this.currentMissionIndex == 0) {
+      if (this.descriptionIndex != 0) {
+        this.descriptionIndex--;
+      } else if (this.currentMissionIndex == 0) {
         this.redirectTo('/introduction');
       } else {
         this.currentMissionIndex--;
         this.currentMission = this.missionList[this.currentMissionIndex];
+        this.descriptionLastIndex = this.currentMission.description.length - 1;
+        this.descriptionIndex = this.descriptionLastIndex;
         this.getTaskData();
         const missionList = this.missionList;
         this.missionList = [];
@@ -358,6 +387,8 @@ export default {
       } else {
         this.currentMissionIndex++;
         this.currentMission = this.missionList[this.currentMissionIndex];
+        this.descriptionLastIndex = this.currentMission.description.length - 1;
+        this.descriptionIndex = 0;
         this.getTaskData();
         const missionList = this.missionList;
         this.missionList = [];

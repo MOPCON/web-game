@@ -2,7 +2,7 @@
   <div class="CrowdedNotice home-bg">
     <div class="container">
       <div class="box">
-        <div class="image-mo"></div>
+        <img class="image-mo" src="@/assets/images/mo/notice.png" />
         <h1>這裡是不是太擠了...</h1>
         <span>
           建議使用<span class="color-dark-blue fw-700"
@@ -43,9 +43,7 @@ export default {
       text-align: center;
     }
     .image-mo {
-      width: 350px;
-      height: 385px;
-      border: 1px #000 solid;
+      width: 100%;
     }
   }
 }

@@ -2,7 +2,7 @@
   <div class="Register home-bg">
     <div class="container">
       <div class="area">
-        <div class="image">image</div>
+        <div class="image" />
         <div class="box">
           <h2>即刻化身勇者加入</h2>
           <h1>讓世人記得勇者大人的名號</h1>
@@ -340,7 +340,9 @@ export default {
     @include flex(center, row, center);
     width: 35%;
     border: 1px $colorGray solid;
-    background-color: $colorWhiteLight;
+    background-image: url($castle);
+    background-size: cover;
+    background-position: 45%;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.25);
     border-radius: 8px 0px 0px 8px;
   }

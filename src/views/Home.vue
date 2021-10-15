@@ -1,7 +1,7 @@
 <template>
   <div class="Home home-bg">
     <div class="container area">
-      <div class="image-mo"></div>
+      <img class="image-mo" src="@/assets/images/mo/caption.png" />
       <div class="box">
         <h2>即刻化身勇者加入</h2>
         <h1>拯救 MO 孃大挑戰！</h1>
@@ -62,8 +62,6 @@ export default {
   }
   .image-mo {
     width: 35%;
-    height: 650px;
-    border: 1px #000 solid;
   }
   .box {
     width: calc(65% - 1rem);

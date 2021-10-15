@@ -2,7 +2,7 @@
   <div class="Login home-bg">
     <div class="container">
       <div class="area">
-        <div class="image">image</div>
+        <div class="image" />
         <div class="box">
           <h2>即刻回到戰場</h2>
           <h1>讓世人記得勇者大人的名號</h1>
@@ -181,7 +181,9 @@ export default {
     @include flex(center, row, center);
     width: 30%;
     border: 1px $colorGray solid;
-    background-color: $colorWhiteLight;
+    background-image: url($castle);
+    background-size: 350%;
+    background-position-x: 45%;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.25);
     border-radius: 8px 0px 0px 8px;
   }

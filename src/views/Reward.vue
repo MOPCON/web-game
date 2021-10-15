@@ -1,18 +1,21 @@
 <template>
   <div class="Reward home-bg">
     <div class="container area">
-      <div class="image-mo"></div>
+      <img class="image-mo" src="@/assets/images/mo/caption.png" />
       <div class="box">
         <h2>感謝偉大的勇者加入</h2>
         <h1>拯救了 MO 孃！</h1>
         <div class="title">
           <img src="@/assets/images/title-tag.svg" />
-          <h3 class="color-primary">恭喜 ${name} 破完所有關卡了！</h3>
+          <h3 class="color-primary">恭喜 {{ nickname }} 破完所有關卡了！</h3>
         </div>
         <p>
           現在只要<span class="color-dark-blue fw-700">截圖此畫面</span
-          >即可參加抽獎，詳情可參考底下的抽獎方式。 最後，別忘了按讚訂閱 Mosume
-          高雄某素梅的 YouTube 頻道，並按讚 Facebook 粉專哦！
+          >即可參加抽獎，詳情可參考底下的抽獎方式。
+        </p>
+        <p>
+          最後，別忘了按讚訂閱 Mosume 高雄某素梅的 YouTube 頻道，並按讚 Facebook
+          粉專哦！
         </p>
         <p>那麼，就祝大家都能夠中獎啦！</p>
         <div class="btn-area">
@@ -41,7 +44,11 @@
       </div>
     </div>
   </div>
-  <Modal :modal-open="modalOpen" @modal-close="closeModal">
+  <Modal
+    :modal-open="modalOpen"
+    @modal-close="closeModal"
+    :black-mode="blackMode"
+  >
     <div class="modal-title">
       <h1 class="color-orange">抽獎方式</h1>
     </div>
@@ -75,17 +82,34 @@
 
 <script>
 import Modal from '@/components/Modal';
+import api from '../apis/index';
 export default {
   name: 'Reward',
+  provide() {
+    return {
+      api: api,
+    };
+  },
   components: {
     Modal,
   },
   data() {
     return {
       modalOpen: false,
+      nickname: 'Name',
     };
   },
+  props: {
+    blackMode: Boolean,
+  },
+  emits: ['canPrevious'],
+  created() {
+    this.getMeData();
+  },
   methods: {
+    redirectTo(url) {
+      this.$router.push({ path: url });
+    },
     openModal() {
       const vm = this;
       vm.modalOpen = true;
@@ -95,6 +119,22 @@ export default {
     },
     openWindow(url) {
       window.open(url);
+    },
+    getMeData() {
+      api.auth
+        .me()
+        .then((response) => {
+          let res = response.data;
+          this.nickname = res.data.nickname;
+          const currentMission = res.data.current_mission;
+          const missionLength = res.data.mission_list.length;
+          if (currentMission != missionLength) {
+            this.redirectTo('/game');
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
   },
 };
@@ -112,8 +152,6 @@ export default {
   }
   .image-mo {
     width: 35%;
-    height: 650px;
-    border: 1px #000 solid;
   }
   .box {
     width: calc(65% - 1rem);
@@ -135,6 +173,13 @@ export default {
     .btn-area {
       @include flex(space-evenly);
       margin-top: 3rem;
+      .btn {
+        padding: 0rem 1.5rem;
+        @include screen(md) {
+          padding: 0rem 0.5rem;
+          font-size: 1rem;
+        }
+      }
       .btn-orange svg {
         margin-left: 0;
         margin-right: 0.5rem;
@@ -168,6 +213,11 @@ export default {
     }
     p {
       color: $colorBlack;
+      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .button-area {
+      margin-top: 1.5rem;
     }
   }
 }

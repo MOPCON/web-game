@@ -45,7 +45,7 @@
       </div>
       <div class="button-area">
         <div class="btn btn-black" @click="closeModal(false)">取消</div>
-        <div class="btn btn-black" @click="redirectTo('/leave')">離開遊戲</div>
+        <div class="btn btn-black" @click="leaveGame">離開遊戲</div>
       </div>
     </div>
   </Modal>
@@ -109,9 +109,10 @@ export default {
       this.getIntroduction(this.introductionId);
     },
     openLeaveGame() {
-      console.log('leave game');
-      console.log(this.blackMode);
       this.openModal();
+    },
+    leaveGame() {
+      window.location.href = process.env.VUE_APP_LEAVE_URL;
     },
     openModal() {
       const vm = this;

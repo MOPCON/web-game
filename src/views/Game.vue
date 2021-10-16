@@ -151,7 +151,7 @@
       </div>
       <div class="button-area">
         <div class="btn btn-black" @click="closeModal(false)">取消</div>
-        <div class="btn btn-black" @click="redirectTo('/leave')">離開遊戲</div>
+        <div class="btn btn-black" @click="leaveGame">離開遊戲</div>
       </div>
     </div>
     <Form
@@ -169,7 +169,16 @@
             <img src="@/assets/images/title-tag.svg" />
             <h3>提示</h3>
           </div>
-          <p>{{ question.description }}</p>
+          <p :class="{ 'mb-2': question.description_e != '' }">
+            {{ question.description }}
+          </p>
+          <div
+            v-if="question.description_e != ''"
+            class="btn btn-black btn-inline-block mb-6"
+            @click="openWindow(question.description_e)"
+          >
+            前往遊戲
+          </div>
           <div class="title">
             <img src="@/assets/images/title-tag.svg" />
             <h3>題目</h3>
@@ -213,10 +222,7 @@
         </p>
       </div>
       <div class="button-area">
-        <div
-          class="btn btn-black"
-          @click="downloadPrize(questionList[0].uid, questionList[0].name)"
-        >
+        <div class="btn btn-black" @click="openWindow(questionList[0].uid)">
           下載獎品
         </div>
       </div>
@@ -294,6 +300,9 @@ export default {
     openLeaveGame() {
       this.openModal('leave');
     },
+    leaveGame() {
+      window.location.href = process.env.VUE_APP_LEAVE_URL;
+    },
     openModal(type) {
       this.modalType = type;
       const vm = this;
@@ -304,9 +313,6 @@ export default {
     },
     openWindow(url) {
       window.open(url);
-    },
-    downloadPrize(url) {
-      this.openWindow(url);
     },
     continueMission() {
       this.$emit('showLoading', true);

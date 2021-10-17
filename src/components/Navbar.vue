@@ -1,8 +1,10 @@
 <template>
   <div class="navbar">
     <nav class="container">
-      <img v-if="!blackMode" src="@/assets/images/logo-b.svg" />
-      <img v-if="blackMode" src="@/assets/images/logo-w.svg" />
+      <a href="https://mopcon.org/2021/">
+        <img v-if="!blackMode" src="@/assets/images/logo-b.svg" />
+        <img v-if="blackMode" src="@/assets/images/logo-w.svg" />
+      </a>
       <div v-if="blackMode" class="item-list">
         <div v-if="canPrevious" class="item" @click="previousPage">
           <i class="fas fa-arrow-left"></i>

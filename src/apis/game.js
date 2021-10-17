@@ -1,4 +1,5 @@
 import req from './https';
+import reqBlob from './download';
 
 const game = {
   getTask(id) {
@@ -6,6 +7,9 @@ const game = {
   },
   verify(type, params) {
     return req('post', '/verify/' + type, params);
+  },
+  download(url) {
+    return reqBlob('get', url);
   },
 };
 

@@ -222,7 +222,10 @@
         </p>
       </div>
       <div class="button-area">
-        <div class="btn btn-black" @click="openWindow(questionList[0].uid)">
+        <div
+          class="btn btn-black"
+          @click="downloadPrize(questionList[0]['description_e'])"
+        >
           下載獎品
         </div>
       </div>
@@ -450,6 +453,37 @@ export default {
     },
     getImgUrl(pic) {
       return require('@/assets/images/game/' + pic);
+    },
+    downloadPrize(url) {
+      this.$emit('showLoading', true);
+      api.game
+        .download(url)
+        .then((response) => {
+          this.downloadFile(response);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
+        });
+    },
+    downloadFile(data) {
+      if (!data) {
+        return;
+      }
+
+      let blob = new Blob([data.data], {
+        type: 'application/zip',
+      });
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = window.URL.createObjectURL(blob);
+
+      const fileName = 'mosume_gift.zip';
+      link.download = fileName;
+      link.click();
+      window.URL.revokeObjectURL(link.href);
     },
   },
 };

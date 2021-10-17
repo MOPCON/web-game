@@ -42,6 +42,9 @@
 <script>
 export default {
   name: 'Home',
+  created() {
+    this.$emit('showLoading', false);
+  },
   methods: {
     redirectTo(url) {
       this.$router.push({ path: url });

@@ -185,6 +185,27 @@
                 ></span
               >
             </div>
+            <div class="recaptcha">
+              <vue-recaptcha
+                theme="light"
+                size="normal"
+                :tabindex="0"
+                @widgetId="recaptchaWidget = $event"
+                @verify="callbackVerify($event)"
+                @expired="callbackExpired()"
+                @fail="callbackFail()"
+              />
+              <div
+                class="input-error"
+                v-if="
+                  errorMessage['g-recaptcha-response'] &&
+                  errorMessage['g-recaptcha-response'].length > 0
+                "
+              >
+                <i class="fas fa-times-circle"></i
+                >{{ errorMessage['g-recaptcha-response'][0] }}
+              </div>
+            </div>
             <div class="btn-area">
               <button class="btn btn-orange">
                 註冊<i class="fas fa-long-arrow-alt-right"></i>
@@ -229,16 +250,19 @@
 </template>
 
 <script>
+import { ref } from 'vue';
 import Modal from '@/components/Modal';
 import { Field, Form } from 'vee-validate';
 import * as Yup from 'yup';
 import api from '../apis/index';
+import { VueRecaptcha, useRecaptcha } from 'vue3-recaptcha-v2';
 export default {
   name: 'Register',
   components: {
     Modal,
     Field,
     Form,
+    VueRecaptcha,
   },
   props: {
     blackMode: Boolean,
@@ -248,7 +272,7 @@ export default {
       api: api,
     };
   },
-  emits: ['canPrevious'],
+  emits: ['canPrevious', 'showLoading'],
   setup() {
     const schema = Yup.object().shape({
       email: Yup.string().required('請輸入您的帳號/電子郵件'),
@@ -263,8 +287,35 @@ export default {
       ticket_number: Yup.string().required('請輸入您的購票序號'),
       policy: Yup.string().required(),
     });
+
+    const { resetRecaptcha } = useRecaptcha();
+    const recaptchaWidget = ref(null);
+    let recaptchaToken = null;
+
+    const callbackVerify = (response) => {
+      recaptchaToken = response;
+    };
+    const callbackExpired = () => {
+      recaptchaToken = null;
+    };
+    const callbackFail = () => {
+      recaptchaToken = null;
+    };
+    const actionReset = () => {
+      resetRecaptcha(recaptchaWidget.value);
+    };
+    const getRecaptchaToken = () => {
+      return recaptchaToken;
+    };
+
     return {
       schema,
+      recaptchaWidget,
+      callbackVerify,
+      callbackExpired,
+      callbackFail,
+      actionReset,
+      getRecaptchaToken,
     };
   },
   data() {
@@ -295,11 +346,13 @@ export default {
       this.showConfirmPassword = !this.showConfirmPassword;
     },
     onSubmit() {
+      this.$emit('showLoading', true);
       const data = {
         email: this.email,
         password: this.password,
         nickname: this.nickname,
         ticket_number: this.ticket_number,
+        'g-recaptcha-response': this.getRecaptchaToken(),
       };
       api.auth
         .register(data)
@@ -314,6 +367,9 @@ export default {
         })
         .catch((error) => {
           this.errorMessage = error.response.data;
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
         });
     },
     redirectTo(url) {
@@ -363,9 +419,12 @@ export default {
         margin-left: 0.5rem;
       }
     }
+    .recaptcha {
+      margin-top: 1rem;
+    }
     .btn-area {
       @include flex(flex-end);
-      margin-top: 3rem;
+      margin-top: 2rem;
     }
     .form-group {
       @include flex;

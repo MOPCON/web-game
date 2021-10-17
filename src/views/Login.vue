@@ -77,6 +77,27 @@
                 </div>
               </div>
             </div>
+            <div class="recaptcha">
+              <vue-recaptcha
+                theme="light"
+                size="normal"
+                :tabindex="0"
+                @widgetId="recaptchaWidget = $event"
+                @verify="callbackVerify($event)"
+                @expired="callbackExpired()"
+                @fail="callbackFail()"
+              />
+              <div
+                class="input-error"
+                v-if="
+                  errorMessage['g-recaptcha-response'] &&
+                  errorMessage['g-recaptcha-response'].length > 0
+                "
+              >
+                <i class="fas fa-times-circle"></i
+                >{{ errorMessage['g-recaptcha-response'][0] }}
+              </div>
+            </div>
             <div class="input-error" v-if="message != ''">
               <i class="fas fa-times-circle"></i>
               <span>
@@ -96,20 +117,24 @@
 </template>
 
 <script>
+import { ref } from 'vue';
 import { Field, Form } from 'vee-validate';
 import * as Yup from 'yup';
 import api from '../apis/index';
+import { VueRecaptcha, useRecaptcha } from 'vue3-recaptcha-v2';
 export default {
   name: 'Login',
   components: {
     Field,
     Form,
+    VueRecaptcha,
   },
   provide() {
     return {
       api: api,
     };
   },
+  emits: ['canPrevious', 'showLoading'],
   setup() {
     const schema = Yup.object().shape({
       email: Yup.string().required('請輸入您的帳號/電子郵件'),
@@ -118,8 +143,35 @@ export default {
         .max(18, '密碼最多 18 碼')
         .required('請輸入您的密碼'),
     });
+
+    const { resetRecaptcha } = useRecaptcha();
+    const recaptchaWidget = ref(null);
+    let recaptchaToken = null;
+
+    const callbackVerify = (response) => {
+      recaptchaToken = response;
+    };
+    const callbackExpired = () => {
+      recaptchaToken = null;
+    };
+    const callbackFail = () => {
+      recaptchaToken = null;
+    };
+    const actionReset = () => {
+      resetRecaptcha(recaptchaWidget.value);
+    };
+    const getRecaptchaToken = () => {
+      return recaptchaToken;
+    };
+
     return {
       schema,
+      recaptchaWidget,
+      callbackVerify,
+      callbackExpired,
+      callbackFail,
+      actionReset,
+      getRecaptchaToken,
     };
   },
   data() {
@@ -136,9 +188,11 @@ export default {
       this.showPassword = !this.showPassword;
     },
     onSubmit() {
+      this.$emit('showLoading', true);
       const data = {
         uid: this.email,
         password: this.password,
+        'g-recaptcha-response': this.getRecaptchaToken(),
       };
       api.auth
         .login(data)
@@ -153,7 +207,13 @@ export default {
         })
         .catch((error) => {
           this.errorMessage = error.response.data;
-          this.message = '請確認帳號或密碼是否正確';
+          this.message =
+            this.errorMessage.message === undefined
+              ? ''
+              : '請確認帳號或密碼是否正確';
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
         });
     },
     redirectTo(url) {
@@ -204,9 +264,12 @@ export default {
       margin-top: 2rem;
       margin-bottom: 0.5rem;
     }
+    .recaptcha {
+      margin-top: 1rem;
+    }
     .btn-area {
       @include flex(flex-end);
-      margin-top: 3rem;
+      margin-top: 2rem;
     }
   }
 }

@@ -1,4 +1,7 @@
 <template>
+  <div>
+    <loading v-model:active="isLoading"></loading>
+  </div>
   <div v-if="!isMobile">
     <Navbar
       :black-mode="blackMode"
@@ -12,6 +15,7 @@
         :is="Component"
         :black-mode="blackMode"
         v-on:can-previous="canPreviousEmit"
+        v-on:show-loading="showLoading"
       />
     </router-view>
   </div>
@@ -32,6 +36,7 @@ export default {
     return {
       innerWidth: null,
       canPrevious: false,
+      isLoading: false,
     };
   },
   computed: {
@@ -63,6 +68,9 @@ export default {
     },
     openLeaveGameEmit() {
       this.$refs.view.openLeaveGame();
+    },
+    showLoading(isShow) {
+      this.isLoading = isShow;
     },
   },
 };

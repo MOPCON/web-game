@@ -43,16 +43,16 @@
             </div>
           </div>
           <img
-            v-if="currentMission.image && !isFinish"
+            v-if="currentMission.image != undefined && !isFinish"
             class="bg"
-            :src="getImgUrl(currentMission.image)"
+            :src="getImgUrl(currentMission.image[descriptionIndex])"
           />
           <img v-if="isFinish" class="bg" :src="getImgUrl('bg-13.png')" />
         </div>
         <div class="orange-hr" />
         <div class="content">
-          <p v-if="!isFinish">
-            {{ this.currentMission.description }}
+          <p v-if="currentMission.description != undefined && !isFinish">
+            {{ this.currentMission.description[descriptionIndex] }}
           </p>
           <p v-if="isFinish">
             在蒐集完這三項重要元素後，終於成功說服大魔王遠古神獸-攻城獅將 Mosume
@@ -75,14 +75,31 @@
               挑戰遊戲<i class="fas fa-arrow-right"></i>
             </div>
             <div
-              v-if="currentMission.uid == giftId"
+              v-if="
+                currentMission.uid == giftId &&
+                currentMissionIndex != lastIndex &&
+                descriptionIndex < descriptionLastIndex
+              "
+              class="btn btn-black"
+              @click="continueMission"
+            >
+              點擊繼續<i class="fas fa-arrow-right"></i>
+            </div>
+            <div
+              v-if="
+                currentMission.uid == giftId &&
+                descriptionIndex == descriptionLastIndex
+              "
               class="btn btn-black"
               @click="openModal('prize')"
             >
               領取獎品<i class="fas fa-arrow-right"></i>
             </div>
             <div
-              v-if="currentMission.uid == giftId"
+              v-if="
+                currentMission.uid == giftId &&
+                descriptionIndex == descriptionLastIndex
+              "
               class="btn btn-black"
               @click="continueMission()"
             >
@@ -134,7 +151,7 @@
       </div>
       <div class="button-area">
         <div class="btn btn-black" @click="closeModal(false)">取消</div>
-        <div class="btn btn-black" @click="redirectTo('/leave')">離開遊戲</div>
+        <div class="btn btn-black" @click="leaveGame">離開遊戲</div>
       </div>
     </div>
     <Form
@@ -152,7 +169,16 @@
             <img src="@/assets/images/title-tag.svg" />
             <h3>提示</h3>
           </div>
-          <p>{{ question.description }}</p>
+          <p :class="{ 'mb-2': question.description_e != '' }">
+            {{ question.description }}
+          </p>
+          <div
+            v-if="question.description_e != ''"
+            class="btn btn-black btn-inline-block mb-6"
+            @click="openWindow(question.description_e)"
+          >
+            前往遊戲
+          </div>
           <div class="title">
             <img src="@/assets/images/title-tag.svg" />
             <h3>題目</h3>
@@ -198,7 +224,7 @@
       <div class="button-area">
         <div
           class="btn btn-black"
-          @click="downloadPrize(questionList[0].uid, questionList[0].name)"
+          @click="downloadPrize(questionList[0]['description_e'])"
         >
           下載獎品
         </div>
@@ -261,19 +287,24 @@ export default {
       isFinish: false,
       questionList: [],
       answerList: [],
+      descriptionLastIndex: 0,
+      descriptionIndex: 0,
     };
   },
   created() {
     this.getMeData();
-    this.$emit('can-previous', true);
+    this.$emit('canPrevious', true);
   },
-  emits: ['canPrevious'],
+  emits: ['canPrevious', 'showLoading'],
   methods: {
     redirectTo(url) {
       this.$router.push({ path: url });
     },
     openLeaveGame() {
       this.openModal('leave');
+    },
+    leaveGame() {
+      window.location.href = process.env.VUE_APP_LEAVE_URL;
     },
     openModal(type) {
       this.modalType = type;
@@ -286,17 +317,21 @@ export default {
     openWindow(url) {
       window.open(url);
     },
-    downloadPrize(url) {
-      this.openWindow(url);
-    },
     continueMission() {
-      const data = {
-        answer: this.answerList,
-      };
-      this.moMessage = '';
-      this.verify(data);
+      this.$emit('showLoading', true);
+      if (this.descriptionIndex === this.descriptionLastIndex) {
+        const data = {
+          answer: this.answerList,
+        };
+        this.moMessage = '';
+        this.verify(data);
+      } else {
+        this.descriptionIndex++;
+        this.$emit('showLoading', false);
+      }
     },
     getMeData() {
+      this.$emit('showLoading', true);
       api.auth
         .me()
         .then((response) => {
@@ -304,6 +339,8 @@ export default {
           this.missionList = res.data.mission_list;
           this.currentMissionIndex = parseInt(res.data.current_mission) - 1;
           this.currentMission = this.missionList[this.currentMissionIndex];
+          this.descriptionLastIndex =
+            this.currentMission.description.length - 1;
           this.lastIndex = this.missionList.length - 1;
           this.giftId = res.data.gift_mission;
           this.getTaskData();
@@ -333,15 +370,24 @@ export default {
         })
         .catch((error) => {
           console.log(error);
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
         });
     },
     previousPage() {
+      this.$emit('showLoading', true);
       this.moMessage = '';
-      if (this.currentMissionIndex == 0) {
+      if (this.descriptionIndex != 0) {
+        this.descriptionIndex--;
+        this.$emit('showLoading', false);
+      } else if (this.currentMissionIndex == 0) {
         this.redirectTo('/introduction');
       } else {
         this.currentMissionIndex--;
         this.currentMission = this.missionList[this.currentMissionIndex];
+        this.descriptionLastIndex = this.currentMission.description.length - 1;
+        this.descriptionIndex = this.descriptionLastIndex;
         this.getTaskData();
         const missionList = this.missionList;
         this.missionList = [];
@@ -352,12 +398,15 @@ export default {
       }
     },
     nextMission() {
+      this.$emit('showLoading', true);
       if (this.currentMissionIndex == this.lastIndex) {
         this.isFinish = true;
         this.scrollToId('Game');
       } else {
         this.currentMissionIndex++;
         this.currentMission = this.missionList[this.currentMissionIndex];
+        this.descriptionLastIndex = this.currentMission.description.length - 1;
+        this.descriptionIndex = 0;
         this.getTaskData();
         const missionList = this.missionList;
         this.missionList = [];
@@ -393,6 +442,9 @@ export default {
         })
         .catch((error) => {
           console.log(error);
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
         });
     },
     scrollToId(id) {
@@ -401,6 +453,37 @@ export default {
     },
     getImgUrl(pic) {
       return require('@/assets/images/game/' + pic);
+    },
+    downloadPrize(url) {
+      this.$emit('showLoading', true);
+      api.game
+        .download(url)
+        .then((response) => {
+          this.downloadFile(response);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          this.$emit('showLoading', false);
+        });
+    },
+    downloadFile(data) {
+      if (!data) {
+        return;
+      }
+
+      let blob = new Blob([data.data], {
+        type: 'application/zip',
+      });
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = window.URL.createObjectURL(blob);
+
+      const fileName = 'mosume_gift.zip';
+      link.download = fileName;
+      link.click();
+      window.URL.revokeObjectURL(link.href);
     },
   },
 };

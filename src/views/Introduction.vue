@@ -45,7 +45,7 @@
       </div>
       <div class="button-area">
         <div class="btn btn-black" @click="closeModal(false)">取消</div>
-        <div class="btn btn-black" @click="redirectTo('/leave')">離開遊戲</div>
+        <div class="btn btn-black" @click="leaveGame">離開遊戲</div>
       </div>
     </div>
   </Modal>
@@ -70,12 +70,13 @@ export default {
       modalOpen: false,
     };
   },
-  emits: ['canPrevious'],
+  emits: ['canPrevious', 'showLoading'],
   created() {
     this.getIntroductionData();
   },
   methods: {
     getIntroductionData() {
+      this.$emit('showLoading', true);
       axios
         .get(process.env.VUE_APP_BASE_URL + '/introduction.json')
         .then((response) => {
@@ -87,9 +88,11 @@ export default {
       this.introduction = this.introductionList.filter(function (item) {
         return item.id === id;
       })[0];
-      this.$emit('can-previous', this.introduction.can_previous);
+      this.$emit('canPrevious', this.introduction.can_previous);
+      this.$emit('showLoading', false);
     },
     nextPage() {
+      this.$emit('showLoading', true);
       if (this.introduction.next_type === 'introduction') {
         this.introductionId = this.introduction.next_introduction_id;
         this.getIntroduction(this.introductionId);
@@ -101,13 +104,15 @@ export default {
       this.$router.push({ path: url });
     },
     previousPage() {
+      this.$emit('showLoading', true);
       this.introductionId = this.introduction.previous_introduction_id;
       this.getIntroduction(this.introductionId);
     },
     openLeaveGame() {
-      console.log('leave game');
-      console.log(this.blackMode);
       this.openModal();
+    },
+    leaveGame() {
+      window.location.href = process.env.VUE_APP_LEAVE_URL;
     },
     openModal() {
       const vm = this;

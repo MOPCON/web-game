@@ -10,8 +10,13 @@
           <h3 class="color-primary">遊戲方法</h3>
         </div>
         <p>
-          遊戲過程中需搭配 MOPCON Gather Town
-          地圖，並至指定贊助商及社群攤位中獲取線索。
+          遊戲過程中需搭配
+          <a
+            class="link"
+            href="https://docs.google.com/presentation/d/1Yc3fyoBFU90sysUaHv2WKYmhCtmWPFV7Rtn_Cw-H3eM/edit#slide=id.gf6549181cf_3_0"
+            target="_blank"
+            >MOPCON Gather Town 地圖</a
+          >，並至指定贊助商及社群攤位中獲取線索。
         </p>
         <p>
           聽說只要完成一半的闖關進度，就能獲得精美小獎品乙份！如果你很厲害闖到最後一關，就可以再額外獲得抽獎資格哦！
@@ -57,6 +62,13 @@ export default {
 .Home {
   min-height: 800px;
   height: 100vh;
+  .link {
+    text-decoration: underline;
+    font-size: 1.25rem;
+    &:hover {
+      opacity: 0.8;
+    }
+  }
   .area {
     @include flex(space-between, row, center);
     height: 100%;
